@@ -8,7 +8,7 @@ module Plugin
 import Neovim
 
 import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
-import Plugin.Fibonacci2 (fibonacci2)
+import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
 
 plugin :: Neovim () NeovimPlugin
@@ -17,7 +17,7 @@ plugin = do
     wrapPlugin Plugin
         { environment = randomPluginState
         , exports =
-				[ $(function' 'fibonacci2) Sync
+				[ $(function' 'fibonacci) Sync
 			     ,$(function' 'fprodTeam) Sync
             -- Notice the quotation mark before the functin name, this is
             -- important!

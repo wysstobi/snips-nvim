@@ -23,7 +23,7 @@ executable snippet-plugin
   main-is:             nvim.hs
   hs-source-dirs:      ., src
   other-modules:       Plugin
-                     , Plugin.Fibonacci2
+                     , Plugin.Fibonacci
                      , Plugin.Random
                      , Plugin.FprodTeam
   build-depends:       base >= 4.7 && < 5
