@@ -31,8 +31,10 @@ Plug 'neovimhaskell/nvim-hs.vim'
 ## Usage
 1. Clone this Git Repository
 2. Create a file that is loaded by neovim on startup an add the following content:
-```vimL
-call nvimhs#start('PATH/TO/YOUR/REPO', 'snippet-plugin', [])
+```lua
+vim.cmd( [[ 
+  call nvimhs#start('PATH/TO/THE/REPO', 'snips.nvim', []) 
+]])
 ```
 3. Run `stack build` in your repository's folder
 4. Test the installation: run `:echo FprodTeam()`, should print the names of the team
@@ -41,8 +43,26 @@ call nvimhs#start('PATH/TO/YOUR/REPO', 'snippet-plugin', [])
 * [Haskell plugin backend for neovim](https://hackage.haskell.org/package/nvim-hs)
 * [nvim-hs.vim](https://github.com/neovimhaskell/nvim-hs.vim)
 
+## Development
+- for LSP to work use and install hls version 1.10.0.0 using ghcup
 
+### Recompile
+add a keybinding to your nvim config:
+  vim: 
+  ```vimL
+    nnoremap <F5> :call nvimhs#compileAndRestart('name-of-the-plugin')<CR>
+  ```
+
+  nvim: 
+  ```lua
+vim.keymap.set("n", "<F5>",
+  function()
+    vim.cmd([[ call nvimhs#compileAndRestart('snippet-plugin') ]])
+    print("recompiled")
+  end
+)
+``
 ## Contact
 - Tobias Wyss - tobias.wyss@students.fhw.ch
-- Raphael Lüthy - tobias.wyss@students.fhw.ch
+- Raphael Lüthy - raphael.luethy@students.fhnw.ch
 - Andri Wild - andri.wild@students.fhnw.ch 
