@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           snippet-plugin
+name:           snips
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/snippet-plugin#readme>
 homepage:       https://github.com/githubuser/snippet-plugin#readme
@@ -19,7 +19,7 @@ extra-source-files:
     README.md
 
 
-executable snippet-plugin 
+executable snips
   main-is:             nvim.hs
   hs-source-dirs:      ., src
   other-modules:       Plugin

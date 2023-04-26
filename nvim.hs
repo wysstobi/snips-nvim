@@ -1,9 +1,9 @@
 import Neovim
 
-import qualified Plugin as SnippetPlugin
+import qualified Plugin as Snips
 
 main :: IO ()
 main = do
     neovim defaultConfig
-        { plugins = plugins defaultConfig ++ [ SnippetPlugin.plugin ]
+        { plugins = plugins defaultConfig ++ [ Snips.plugin ]
         }
