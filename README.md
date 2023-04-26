@@ -61,7 +61,8 @@ vim.keymap.set("n", "<F5>",
     print("recompiled")
   end
 )
-``
+```
+
 ## Contact
 - Tobias Wyss - tobias.wyss@students.fhw.ch
 - Raphael Lüthy - raphael.luethy@students.fhnw.ch
