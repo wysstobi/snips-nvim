@@ -33,7 +33,7 @@ Plug 'neovimhaskell/nvim-hs.vim'
 2. Create a file that is loaded by neovim on startup an add the following content:
 ```lua
 vim.cmd( [[ 
-  call nvimhs#start('PATH/TO/THE/REPO', 'snips.nvim', []) 
+  call nvimhs#start('PATH/TO/THE/REPO', 'snips', []) 
 ]])
 ```
 3. Run `stack build` in your repository's folder
@@ -57,7 +57,7 @@ add a keybinding to your nvim config:
   ```lua
 vim.keymap.set("n", "<F5>",
   function()
-    vim.cmd([[ call nvimhs#compileAndRestart('snippet-plugin') ]])
+    vim.cmd([[ call nvimhs#compileAndRestart('snips') ]])
     print("recompiled")
   end
 )
