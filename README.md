@@ -44,10 +44,11 @@ vim.cmd( [[
 ## Development
 - for LSP to work use and install hls version 1.10.0.0 using ghcup
 
-### Try out functions
+### Debugging
 1. export the function in the module definition
 2. start cabal using `cabal repl`
 3. execute the function (e.g. for a function `hello` in the module `Plugin.FprodTeam` just run `Plugin.FprodTeam.hello`)
+Tip: See also: [Debug in nvim-hs](https://hackage.haskell.org/package/nvim-hs-0.2.4/docs/Neovim-Debug.html#v:debug)
 
 ### Recompile the plugin
 add a keybinding to your nvim config:
@@ -66,6 +67,8 @@ vim.keymap.set("n", "<F5>",
 )
 ```
 
+### Links
+[List of functions that are provided by nvim-hs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4/docs/Neovim-API-Text.html#v:vim_command_output)
 ## Contact
 - Tobias Wyss - tobias.wyss@students.fhw.ch
 - Raphael Lüthy - raphael.luethy@students.fhnw.ch

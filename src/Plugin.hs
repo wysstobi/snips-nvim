@@ -9,9 +9,10 @@ import Neovim
 
 import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
-import Plugin.FprodTeam(fprodTeam)
+import Plugin.FprodTeam(fprodTeam, currentSelection)
 import Plugin.Environment.SnipsEnvironment
 import GHC.Conc
+import Neovim.Plugin.Classes (mkCommandOptions)
 
 
 plugin :: Neovim () NeovimPlugin
@@ -22,6 +23,7 @@ plugin = do
           exports = [ 
             $(function' 'fibonacci) Sync, 
             $(function' 'fprodTeam) Sync, 
+            $(command' 'currentSelection) [CmdRange WholeFile],
             $(function' 'nextRandom) Sync,
             $(function "SetNextRandom" 'setNextRandom) Async
           ]

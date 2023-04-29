@@ -28,8 +28,7 @@ randomNumbers = do
 -- | Get the next random number and update the state of the list.
 nextRandom :: SnipsNvim Int16
 nextRandom = do
-    env <- ask
-    let tVarWithRandomNumbers = randomState env
+    tVarWithRandomNumbers <- asks randomState
     atomically $ do
         -- pick the head of our list of random numbers
         r <- head <$> readTVar tVarWithRandomNumbers
@@ -46,6 +45,6 @@ nextRandom = do
 setNextRandom :: Int16 -> SnipsNvim ()
 setNextRandom n = do
     env <- ask
-    let tVarWithRandomNumbers = randomState env  
+    tVarWithRandomNumbers <- asks randomState
     -- cons n to the front of the infinite list
     atomically $ modifyTVar tVarWithRandomNumbers (n:)
