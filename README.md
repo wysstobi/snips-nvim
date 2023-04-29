@@ -10,9 +10,7 @@ For this purpose, a simple snippet management is provided,
 which offers the possibility to select among the available snippets. 
 The snippets are persisted in external files.
 
-
-## Build With
-- [Neovim](https://neovim.io/)
+So this plugin provides a collection of functions that can be called from inside Neovim.
 
 ## Getting started
 
@@ -22,7 +20,7 @@ Make sure `neovim` is installed.
 
 ### Installation
 
-Install using your favorite plugin manager ([vim-plug](https://github.com/junegunn/vim-plug))
+Install using your favorite nvim plugin manager (e.g. [vim-plug](https://github.com/junegunn/vim-plug))
 
 ```vimL
 Plug 'neovimhaskell/nvim-hs.vim'
@@ -46,7 +44,12 @@ vim.cmd( [[
 ## Development
 - for LSP to work use and install hls version 1.10.0.0 using ghcup
 
-### Recompile
+### Try out functions
+1. export the function in the module definition
+2. start cabal using `cabal repl`
+3. execute the function (e.g. for a function `hello` in the module `Plugin.FprodTeam` just run `Plugin.FprodTeam.hello`)
+
+### Recompile the plugin
 add a keybinding to your nvim config:
   vim: 
   ```vimL
