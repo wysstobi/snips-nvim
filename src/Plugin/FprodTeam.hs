@@ -3,6 +3,10 @@ module Plugin.FprodTeam
     ) where
 
 import Neovim
+import GHC.Conc
+import Plugin.Environment.SnipsEnvironment (SnipsNvim, names)
 
-fprodTeam :: Neovim env String
-fprodTeam = return "Tobi, Raphi, Andri" 
+fprodTeam :: SnipsNvim String
+fprodTeam = do
+   names <$> ask
+

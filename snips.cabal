@@ -26,6 +26,7 @@ executable snips
                      , Plugin.Fibonacci
                      , Plugin.Random
                      , Plugin.FprodTeam
+                     , Plugin.Environment.SnipsEnvironment
   build-depends:       base >= 4.7 && < 5
                      , nvim-hs >= 2 && < 3
                      -- The dependencies below are only needed for the example plugin

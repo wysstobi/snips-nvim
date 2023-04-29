@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TemplateHaskell #-}
 module Plugin.Random
     ( nextRandom
     , setNextRandom
@@ -9,14 +8,11 @@ module Plugin.Random
 import Neovim
 import System.Random (newStdGen, randoms)
 import UnliftIO.STM  (TVar, atomically, readTVar, modifyTVar, newTVarIO)
+import Plugin.Environment.SnipsEnvironment (SnipsNvim, SnipsEnv (randomState))
 
 -- | This type alias encodes the type of your plugin's environment, namely
 -- '(TVar [Int16)' in this case.
 --
--- Since this plugin needs to store some state, we have to put it in a mutable
--- variable. I chose TVar here because I like the Software Transactional Memory
--- library.
-type MyNeovim a = Neovim (TVar [Int16]) a
 
 -- | This is the start up code. It initializes the random number generator and
 -- returns a convenient list of random numbers. It returns the environment and
@@ -30,9 +26,10 @@ randomNumbers = do
     newTVarIO (randoms g) -- Put an infinite list of random numbers into a TVar
 
 -- | Get the next random number and update the state of the list.
-nextRandom :: MyNeovim Int16
+nextRandom :: SnipsNvim Int16
 nextRandom = do
-    tVarWithRandomNumbers <- ask
+    env <- ask
+    let tVarWithRandomNumbers = randomState env
     atomically $ do
         -- pick the head of our list of random numbers
         r <- head <$> readTVar tVarWithRandomNumbers
@@ -46,9 +43,9 @@ nextRandom = do
 
 -- | You probably don't want this in a random number generator, but this shows
 -- hoy you can edit the state of a stateful plugin.
-setNextRandom :: Int16 -> MyNeovim ()
+setNextRandom :: Int16 -> SnipsNvim ()
 setNextRandom n = do
-    tVarWithRandomNumbers <- ask
-
+    env <- ask
+    let tVarWithRandomNumbers = randomState env  
     -- cons n to the front of the infinite list
     atomically $ modifyTVar tVarWithRandomNumbers (n:)

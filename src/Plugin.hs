@@ -10,19 +10,19 @@ import Neovim
 import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
+import Plugin.Environment.SnipsEnvironment
+import GHC.Conc
+
 
 plugin :: Neovim () NeovimPlugin
 plugin = do
     randomPluginState <- randomNumbers
     wrapPlugin Plugin
-        { environment = randomPluginState
-        , exports =
-				[ $(function' 'fibonacci) Sync
-			     ,$(function' 'fprodTeam) Sync
-            -- Notice the quotation mark before the functin name, this is
-            -- important!
-
-            , $(function' 'nextRandom) Sync
-            , $(function "SetNextRandom" 'setNextRandom) Async
-            ]
+        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi" },
+          exports = [ 
+            $(function' 'fibonacci) Sync, 
+            $(function' 'fprodTeam) Sync, 
+            $(function' 'nextRandom) Sync,
+            $(function "SetNextRandom" 'setNextRandom) Async
+          ]
         }
