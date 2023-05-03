@@ -24,6 +24,7 @@ executable snips
   hs-source-dirs:      ., src
   other-modules:       Plugin
                      , Plugin.Fibonacci
+                     , Plugin.Snips
                      , Plugin.Random
                      , Plugin.FprodTeam
                      , Plugin.Environment.SnipsEnvironment
