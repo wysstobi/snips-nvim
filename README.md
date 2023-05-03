@@ -68,7 +68,8 @@ vim.keymap.set("n", "<F5>",
 ```
 
 ### Links
-[List of functions that are provided by nvim-hs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4/docs/Neovim-API-Text.html#v:vim_command_output)
+* [List of functions that are provided by nvim-hs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4/docs/Neovim-API-Text.html#v:vim_command_output)
+ * [another plugin using nvim-hs](https://github.com/saep/nvim-hs-ghcid/blob/main/Neovim/Ghcid/Plugin.hs#enroll-beta)
 ## Contact
 - Tobias Wyss - tobias.wyss@students.fhw.ch
 - Raphael Lüthy - raphael.luethy@students.fhnw.ch
