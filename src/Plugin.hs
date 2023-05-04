@@ -20,7 +20,7 @@ plugin :: Neovim () NeovimPlugin
 plugin = do
     randomPluginState <- randomNumbers
     wrapPlugin Plugin
-        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "~/snippets/"},
+        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/snippets/"},
           exports = [ 
             $(function' 'fibonacci) Sync, 
             $(function' 'fprodTeam) Sync, 

@@ -29,8 +29,7 @@ snipsSave _ = do
   path <- asks snippetPath
   lineCount <- buffer_line_count cb
   bufferContent <- buffer_get_lines cb 0 lineCount True
-  -- TODO does not work properly
-  snippetName <- show <$> nvim_execute_lua "vim.fn.input(\"Enter a name for the snippet: \")" []
+  snippetName <- askForString "Enter a name for the snippet:" Nothing
   liftIO $ writeFile (path ++ snippetName ++ ".json") (foldr (\cur acc -> cur ++ "\n" ++ acc) "" bufferContent)
   vim_command "bd!"
 
@@ -40,6 +39,22 @@ readAndPaste readBuf writeBuf from to = do
   lines <- buffer_get_lines readBuf (fromIntegral from -1) (fromIntegral to) True
   buffer_insert writeBuf 0 lines
   return ()
+
+-- | Helper function that calls the @input()@ function of neovim.
+input :: NvimObject result
+      => String -- ^ Message to display
+      -> Maybe String -- ^ Input fiiled in
+      -> Maybe String -- ^ Completion mode
+      -> Neovim env result
+input message mPrefilled mCompletion = fmap fromObjectUnsafe
+  $ vim_call_function "input" $ (message <> " ")
+    +: maybe "" id mPrefilled
+    +: maybe [] (+: []) mCompletion
+
+askForString :: String -- ^ message to put in front
+             -> Maybe String -- ^ Prefilled text
+             -> Neovim env String
+askForString message mPrefilled = input message mPrefilled Nothing
 
 createNewBuf :: String -> Maybe Buffer -> SnipsNvim Buffer
 createNewBuf bufferName focus = case focus of
