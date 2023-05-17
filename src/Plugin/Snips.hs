@@ -11,6 +11,7 @@ import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetP
 import Neovim.API.String
 import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
+import Data.List (intercalate)
 
 snipsCreate :: CommandArguments -> SnipsNvim ()
 snipsCreate CommandArguments { range = _range }  =
@@ -24,7 +25,7 @@ snipsCreate CommandArguments { range = _range }  =
     Nothing -> return ()
 
 snipsSave :: CommandArguments -> SnipsNvim ()
-snipsSave _ = do 
+snipsSave _ = do
   cb <- vim_get_current_buffer
   path <- asks snippetPath
   lineCount <- buffer_line_count cb
@@ -34,18 +35,38 @@ snipsSave _ = do
   vim_command "bd!"
 
 
-readAndPaste :: Buffer -> Buffer -> Int -> Int -> SnipsNvim () 
+readAndPaste :: Buffer -> Buffer -> Int -> Int -> SnipsNvim ()
 readAndPaste readBuf writeBuf from to = do
   lines <- buffer_get_lines readBuf (fromIntegral from -1) (fromIntegral to) True
   buffer_insert writeBuf 0 lines
   return ()
+
+
+
+insertSnippet :: String -> SnipsNvim ()
+insertSnippet snippetName = do
+  snippet <- liftIO $ loadSnippet snippetName
+  buffer <- createNewBuf ("Insert " <> name snippet) Nothing
+  buffer_insert buffer 0 (content snippet)
+
+
+data Snippet = Snippet { name :: String, content :: [String] }
+
+testSnippet :: [Snippet]
+testSnippet = [Snippet "MySnippet" ["hello <#Title#>"], Snippet "Andris Snippet" ["bye <#Title#>"]]
+
+loadSnippet :: String -> IO Snippet
+loadSnippet n = do
+    let s = filter (\(Snippet name _) -> name == n ) testSnippet
+    pure $ head s
 
 -- | Helper function that calls the @input()@ function of neovim.
 input :: NvimObject result
       => String -- ^ Message to display
       -> Maybe String -- ^ Input fiiled in
       -> Maybe String -- ^ Completion mode
-      -> Neovim env result
+      -> SnipsNvim result
+
 input message mPrefilled mCompletion = fmap fromObjectUnsafe
   $ vim_call_function "input" $ (message <> " ")
     +: maybe "" id mPrefilled
@@ -53,13 +74,13 @@ input message mPrefilled mCompletion = fmap fromObjectUnsafe
 
 askForString :: String -- ^ message to put in front
              -> Maybe String -- ^ Prefilled text
-             -> Neovim env String
+             -> SnipsNvim String
 askForString message mPrefilled = input message mPrefilled Nothing
 
 createNewBuf :: String -> Maybe Buffer -> SnipsNvim Buffer
 createNewBuf bufferName focus = case focus of
-  Nothing -> createNewBuf' 
-  Just aBuffer -> do 
+  Nothing -> createNewBuf'
+  Just aBuffer -> do
     cb <- createNewBuf'
     vim_set_current_buffer aBuffer
     return cb
@@ -70,17 +91,19 @@ createNewBuf bufferName focus = case focus of
         buffer_set_name newBuffer bufferName
         vim_get_current_buffer
 
-test :: CommandArguments -> String -> SnipsNvim () 
+test :: CommandArguments -> String -> SnipsNvim ()
 test _ s = do
-  value <- fmap fromObjectUnsafe $ nvim_exec_lua ("return MyFunction('" <> s <> "')") empty  
-  askForString value Nothing
-  pure () 
-  
+  --value <- fmap fromObjectUnsafe $ nvim_exec_lua ("return MyFunction('" <> s <> "')") empty  
+  insertSnippet s
+  pure ()
+
 
 tele :: CommandArguments -> SnipsNvim ()
 tele _ = do
-  nvim_exec_lua ("return run({'Das Erste', 'Champions League', 'Bier saufen'})") empty  
-  pure () 
---test :: CommandArguments -> SnipsNvim env 
--- test = fromObjectUnsafe <$> vim_call_function "expand" [ObjectBinary "%:p:h"]
+  -- create a table from all existing snippets
+  let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) testSnippet
 
+  -- let table = foldr (\(Snippet name _) acc -> acc ++ ", '" ++ name ++ "'") "{" testSnippet ++ "}"
+  let command = "return run({" ++ table ++"})"
+  nvim_exec_lua command empty
+  pure ()
