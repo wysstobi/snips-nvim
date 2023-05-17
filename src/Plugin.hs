@@ -10,22 +10,24 @@ import Neovim
 import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
-import Plugin.Snips(snipsCreate, snipsSave)
+import Plugin.Snips(snipsCreate, snipsSave, test, tele)
 import Plugin.Environment.SnipsEnvironment
 import GHC.Conc
-import Neovim.Plugin.Classes (mkCommandOptions)
+import Neovim.Plugin.Classes (mkCommandOptions, CommandOption (CmdNargs))
 
 
 plugin :: Neovim () NeovimPlugin
 plugin = do
     randomPluginState <- randomNumbers
     wrapPlugin Plugin
-        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/snippets/"},
+        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/home/andri/Documents/snips"},
           exports = [ 
             $(function' 'fibonacci) Sync, 
             $(function' 'fprodTeam) Sync, 
             $(command' 'snipsCreate) [CmdRange WholeFile],
             $(command' 'snipsSave) [CmdRange WholeFile],
+            $(command' 'test) [], 
+            $(command' 'tele) [], 
             $(function' 'nextRandom) Sync,
             $(function "SetNextRandom" 'setNextRandom) Async
           ]

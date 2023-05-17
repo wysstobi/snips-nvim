@@ -2,14 +2,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Plugin.Snips
-    ( snipsCreate, snipsSave
+    ( snipsCreate, snipsSave, test, tele
     ) where
 
 import Neovim
 import GHC.Conc
 import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
 import Neovim.API.String
-import Control.Monad (when)
+import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
 
 snipsCreate :: CommandArguments -> SnipsNvim ()
@@ -69,3 +69,17 @@ createNewBuf bufferName focus = case focus of
         newBuffer <- vim_get_current_buffer
         buffer_set_name newBuffer bufferName
         vim_get_current_buffer
+
+test :: CommandArguments -> String -> SnipsNvim () 
+test _ s = do
+  value <- fmap fromObjectUnsafe $ nvim_exec_lua ("return MyFunction('" <> s <> "')") empty  
+  askForString value Nothing
+  pure () 
+  
+tele :: CommandArguments -> SnipsNvim () 
+tele _ = do
+  nvim_exec_lua ("return run({'Das Erste', 'Champions League', 'Bier saufen'})") empty  
+  pure () 
+--test :: CommandArguments -> SnipsNvim env 
+-- test = fromObjectUnsafe <$> vim_call_function "expand" [ObjectBinary "%:p:h"]
+
