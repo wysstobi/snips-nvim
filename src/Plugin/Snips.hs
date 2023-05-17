@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Plugin.Snips
-    ( snipsCreate, snipsSave, test, tele
+    ( snipsCreate, snipsSave, handleTelescopeSelection, snipsFind
     ) where
 
 import Neovim
@@ -91,15 +91,14 @@ createNewBuf bufferName focus = case focus of
         buffer_set_name newBuffer bufferName
         vim_get_current_buffer
 
-test :: CommandArguments -> String -> SnipsNvim ()
-test _ s = do
-  --value <- fmap fromObjectUnsafe $ nvim_exec_lua ("return MyFunction('" <> s <> "')") empty  
+handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
+handleTelescopeSelection _ s = do
   insertSnippet s
   pure ()
 
 
-tele :: CommandArguments -> SnipsNvim ()
-tele _ = do
+snipsFind :: CommandArguments -> SnipsNvim ()
+snipsFind _ = do
   -- create a table from all existing snippets
   let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) testSnippet
 

@@ -10,7 +10,7 @@ import Neovim
 import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
-import Plugin.Snips(snipsCreate, snipsSave, test, tele)
+import Plugin.Snips(snipsCreate, snipsSave, handleTelescopeSelection, snipsFind)
 import Plugin.Environment.SnipsEnvironment
 import GHC.Conc
 import Neovim.Plugin.Classes (mkCommandOptions, CommandOption (CmdNargs))
@@ -26,8 +26,8 @@ plugin = do
             $(function' 'fprodTeam) Sync, 
             $(command' 'snipsCreate) [CmdRange WholeFile],
             $(command' 'snipsSave) [CmdRange WholeFile],
-            $(command' 'test) [], 
-            $(command' 'tele) [], 
+            $(command' 'handleTelescopeSelection) [], 
+            $(command' 'snipsFind) [], 
             $(function' 'nextRandom) Sync,
             $(function "SetNextRandom" 'setNextRandom) Async
           ]

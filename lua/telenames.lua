@@ -23,7 +23,7 @@ local attach_mappings = function (prompt_bufnr, map)
 				actions.close(prompt_bufnr)
 				local selection = action_state.get_selected_entry()
 				--vim.api.nvim_put({ selection[1] }, "", false, true)
-               vim.cmd('Test ' .. selection[1])
+               vim.cmd('HandleTeleScopeSelection ' .. selection[1])
 
                 return selection[1]
 		end)
