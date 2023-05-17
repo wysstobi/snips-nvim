@@ -76,7 +76,8 @@ test _ s = do
   askForString value Nothing
   pure () 
   
-tele :: CommandArguments -> SnipsNvim () 
+
+tele :: CommandArguments -> SnipsNvim ()
 tele _ = do
   nvim_exec_lua ("return run({'Das Erste', 'Champions League', 'Bier saufen'})") empty  
   pure () 
