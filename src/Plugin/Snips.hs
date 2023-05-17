@@ -13,6 +13,7 @@ import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
 import Data.List (intercalate)
 
+-- :lua print(vim.o.filetype) gets the currentfiletype
 snipsCreate :: CommandArguments -> SnipsNvim ()
 snipsCreate CommandArguments { range = _range }  =
   case _range of
