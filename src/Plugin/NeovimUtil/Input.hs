@@ -1,0 +1,23 @@
+module Plugin.NeovimUtil.Input ( askForString ) where
+
+import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
+import Neovim.API.String
+import Neovim
+
+-- | Helper function that calls the @input()@ function of neovim.
+input :: NvimObject result
+      => String -- ^ Message to display
+      -> Maybe String -- ^ Input fiiled in
+      -> Maybe String -- ^ Completion mode
+      -> SnipsNvim result
+input message mPrefilled mCompletion = fmap fromObjectUnsafe
+  $ vim_call_function "input" $ (message <> " ")
+    +: maybe "" id mPrefilled
+    +: maybe [] (+: []) mCompletion
+
+-- | Helper function to get a tet input from the user
+askForString :: String -- ^ message to put in front
+             -> Maybe String -- ^ Prefilled text
+             -> SnipsNvim String
+askForString message mPrefilled = input message mPrefilled Nothing
+

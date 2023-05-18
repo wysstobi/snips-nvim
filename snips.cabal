@@ -24,9 +24,13 @@ executable snips
   hs-source-dirs:      ., src
   other-modules:       Plugin
                      , Plugin.Fibonacci
-                     , Plugin.Snips
+                     , Plugin.Types
                      , Plugin.Random
                      , Plugin.FprodTeam
+                     , Plugin.SnipsApi
+                     , Plugin.FileIO.FileIO
+                     , Plugin.NeovimUtil.Input
+                     , Plugin.NeovimUtil.Buffer
                      , Plugin.Environment.SnipsEnvironment
   build-depends:       base >= 4.7 && < 5
                      , nvim-hs >= 2 && < 3
