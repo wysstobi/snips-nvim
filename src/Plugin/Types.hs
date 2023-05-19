@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 
-module Plugin.Types () where
+module Plugin.Types (Snippet(..)) where
 
 data Snippet = Snippet { name :: String, content :: [String] }
 

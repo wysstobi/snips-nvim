@@ -1,7 +1,6 @@
 module Plugin.FileIO.FileIO (allSnippets, loadSnippet ) where
+import Plugin.Types  (Snippet(..))
 
-
-data Snippet = Snippet { name :: String, content :: [String] }
 
 sampleData :: [Snippet]
 sampleData = [Snippet "MySnippet" ["hello <#Title#>"], Snippet "Andris Snippet" ["bye <#Title#>"]]

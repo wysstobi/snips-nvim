@@ -13,7 +13,8 @@ import Data.String (IsString(fromString))
 import Data.List (intercalate)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
 import Plugin.NeovimUtil.Input (askForString)
-import Plugin.FileIO.FileIO (loadSnippet, allSnippets, Snippet(..))
+import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
+import Plugin.Types  (Snippet(..))
 
 
 -- :lua print(vim.o.filetype) gets the currentfiletype
