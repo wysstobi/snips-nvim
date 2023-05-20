@@ -14,7 +14,8 @@ import Data.List (intercalate)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..))
+import Plugin.Types  (Snippet(..), PlaceHolder (PlaceHolder, key))
+import Plugin.Text.Text (extractPlaceHolders)
 
 
 -- :lua print(vim.o.filetype) gets the currentfiletype
@@ -46,9 +47,27 @@ snipsSave _ = do
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   snippet <- liftIO $ loadSnippet snippetName
+  let placeHolders = extractPlaceHolders snippet ("<#", "#>")
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
   buffer_insert buffer 0 (content snippet)
+  replacements <- placeHoderReplacements placeHolders
+  let text = replaceInText replacements (content snippet)
+  -- TODO replace Placeholders in buffer
   pure ()
+
+replaceInText :: [PlaceHolder] -> [String] -> String
+replaceInText = undefined
+
+placeHoderReplacements :: [PlaceHolder] -> SnipsNvim [PlaceHolder]
+placeHoderReplacements = placeHoderReplacements' [] where
+  placeHoderReplacements' :: [PlaceHolder] -> [PlaceHolder] -> SnipsNvim [PlaceHolder]
+  placeHoderReplacements' results [] = pure results
+  placeHoderReplacements' results (p:laceHolders) = do
+    let prompt = "Enter a text which replaces: "  ++ key p
+    replacement <- askForString prompt Nothing
+    let newResults = results ++ [PlaceHolder (key p) (Just replacement)]
+    placeHoderReplacements' newResults laceHolders
+
 
 
 -- | Opens a @Telescope@ finder to select a snippet to insert

@@ -25,6 +25,8 @@ executable snips
   other-modules:       Plugin
                      , Plugin.Fibonacci
                      , Plugin.Types
+                     , Plugin.Text.Text
+                     , Plugin.Text.Parsers
                      , Plugin.Random
                      , Plugin.FprodTeam
                      , Plugin.SnipsApi
