@@ -3,7 +3,7 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceHolderT, modify, PlaceHolder(..))
+import Plugin.Types (Snippet(Snippet), PlaceholderT, modify, Placeholder(..))
 import Data.Char (isDigit)
 import GHC.Unicode (isAlphaNum)
 import Control.Applicative
@@ -13,20 +13,20 @@ import Data.Maybe(fromMaybe)
 
 type Quotes = (String, String)
 
-extractPlaceHolders :: Snippet -> Quotes -> [PlaceHolder]
-extractPlaceHolders (Snippet _ content) =
-   map (`PlaceHolder` Nothing) . rmdups . placeHoldersInList content
-  -- modify (\_ -> map (`PlaceHolder` Nothing) placeHolders)
+extractPlaceholders :: Snippet -> Quotes -> [Placeholder]
+extractPlaceholders (Snippet _ content) =
+   map (`Placeholder` Nothing) . rmdups . placeholdersInList content
+  -- modify (\_ -> map (`Placeholder` Nothing) placeholders)
   -- pure $ mconcat content
 
-placeHoldersInList :: [String] -> Quotes -> [String]
-placeHoldersInList lines quotes = placeHoldersInList' lines [] where
-  placeHoldersInList' (a:as) found = found ++ placeHoldersInLine a quotes ++ placeHoldersInList' as found
-  placeHoldersInList' [] found = found
+placeholdersInList :: [String] -> Quotes -> [String]
+placeholdersInList lines quotes = placeholdersInList' lines [] where
+  placeholdersInList' (a:as) found = found ++ placeholdersInLine a quotes ++ placeholdersInList' as found
+  placeholdersInList' [] found = found
 
 
-placeHoldersInLine :: String -> Quotes -> [String]
-placeHoldersInLine line quotes = case parseLine quotes line of
+placeholdersInLine :: String -> Quotes -> [String]
+placeholdersInLine line quotes = case parseLine quotes line of
                         Just (res, _) -> res
                         Nothing       -> []
 
@@ -41,24 +41,24 @@ rmdups :: (Ord a) => [a] -> [a]
 rmdups = map head . group . sort
 
 
-replaceNext :: [PlaceHolder] -> Quotes -> Parser String
+replaceNext :: [Placeholder] -> Quotes -> Parser String
 replaceNext placeholders (start, end) = do
   before <- parseUntil start
   found <- parseUntil end
   let replacement = getReplacementForKey placeholders found
   return (before ++ replacement)
 
-replaceInLine :: [PlaceHolder] -> Quotes -> String -> Maybe String
+replaceInLine :: [Placeholder] -> Quotes -> String -> Maybe String
 replaceInLine placeholders quotes line = mconcat . fst <$> parse (many (replaceNext placeholders quotes)) line
 
-replaceInText :: [PlaceHolder] -> [String] -> Quotes -> Maybe [String]
+replaceInText :: [Placeholder] -> [String] -> Quotes -> Maybe [String]
 replaceInText placeholders [] _ =  Just []
 replaceInText placeholders (l:ine) quotes = case replaceInLine placeholders quotes l of
     Just str -> (++) <$> Just [str] <*> replaceInText placeholders ine quotes
 
-getReplacementForKey :: [PlaceHolder] -> String -> String
+getReplacementForKey :: [Placeholder] -> String -> String
 getReplacementForKey [] _ = ""
-getReplacementForKey ((PlaceHolder key value):ps) placeholder =
+getReplacementForKey ((Placeholder key value):ps) placeholder =
   if placeholder == key
     then
       fromMaybe "" value

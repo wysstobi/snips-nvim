@@ -15,8 +15,8 @@ import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), PlaceHolder (PlaceHolder, key, value))
-import Plugin.Text.Text (extractPlaceHolders, replaceInText)
+import Plugin.Types  (Snippet(..), Placeholder (Placeholder, key, value))
+import Plugin.Text.Text (extractPlaceholders, replaceInText)
 
 
 -- :lua print(vim.o.filetype) gets the currentfiletype
@@ -48,25 +48,25 @@ snipsSave _ = do
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   snippet <- liftIO $ loadSnippet snippetName
-  let placeholders = extractPlaceHolders snippet ("<#", "#>")
+  let placeholders = extractPlaceholders snippet ("<#", "#>")
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
   -- buffer_insert buffer 0 (content snippet)
-  replacements <- placeHoderReplacements placeholders
+  replacements <- placeholderReplacements placeholders
   let text = replaceInText replacements (content snippet)
   let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) ("<#", "#>")
   buffer_insert buffer 0 replacedText
   pure ()
 
 
-placeHoderReplacements :: [PlaceHolder] -> SnipsNvim [PlaceHolder]
-placeHoderReplacements = placeHoderReplacements' [] where
-  placeHoderReplacements' :: [PlaceHolder] -> [PlaceHolder] -> SnipsNvim [PlaceHolder]
-  placeHoderReplacements' results [] = pure results
-  placeHoderReplacements' results (p:laceHolders) = do
+placeholderReplacements :: [Placeholder] -> SnipsNvim [Placeholder]
+placeholderReplacements = placeholderReplacements' [] where
+  placeholderReplacements' :: [Placeholder] -> [Placeholder] -> SnipsNvim [Placeholder]
+  placeholderReplacements' results [] = pure results
+  placeholderReplacements' results (p:laceholders) = do
     let prompt = "Enter a text which replaces: "  ++ key p
     replacement <- askForString prompt Nothing
-    let newResults = results ++ [PlaceHolder (key p) (Just replacement)]
-    placeHoderReplacements' newResults laceHolders
+    let newResults = results ++ [Placeholder (key p) (Just replacement)]
+    placeholderReplacements' newResults laceholders
 
 
 
