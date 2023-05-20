@@ -25,9 +25,7 @@ placeholdersInList found = do
     return found
   else do
     psInLine <- placeholdersInLine
-    PS s qs placeholders <- get
-    psInCurrentline <- placeholdersInLine
-    placeholdersInList (found ++ psInCurrentline)
+    placeholdersInList (found ++ psInLine)
 
 placeholdersInLine :: PlaceholderST [String]
 placeholdersInLine = do 
