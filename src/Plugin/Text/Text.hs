@@ -15,36 +15,42 @@ import Data.Maybe(fromMaybe)
 -- find placeholders
 extractPlaceholders :: PlaceholderST [Placeholder]
 extractPlaceholders = do
-   placeholders <- placeholdersInList []
-   return $ map (`Placeholder` Nothing) . rmdups $ placeholders
+   placeholders <- placeholdersInList [] -- gets all placeholders in the snippet which is in the state
+   return $ map placeholderFromString . rmdups $ placeholders -- remove duplicates
 
+-- | Gets all placeholders from the list in the state.
 placeholdersInList :: [String] -> PlaceholderST [String]
 placeholdersInList found = do
   PS (Snippet name content) qs placeholders <- get
+  -- if content ins empty, we are done
   if null content then
     return found
   else do
-    psInLine <- placeholdersInLine
+    -- save the rest of the content in the state
+    put $ PS (Snippet name $ tail content) qs placeholders
+    -- search the first line for placeholders
+    psInLine <- placeholdersInLine (head content)
     placeholdersInList (found ++ psInLine)
 
-placeholdersInLine :: PlaceholderST [String]
-placeholdersInLine = do 
+-- | Gets all placeholders in the current line.
+placeholdersInLine :: String -> PlaceholderST [String]
+placeholdersInLine line = do 
   PS (Snippet name content) qs placeholders <- get
-  put $ PS (Snippet name $ tail content) qs placeholders
-  let res = case parseLine qs (head content) of
+  let parsed = parse (many $ parseSingle qs) line
+  let res = case parsed of
                         Just (res, _) -> res
                         Nothing       -> []
   return res
 
-parseLine :: Quotes -> String -> Maybe ([String], String)
-parseLine quotes = parse (many $ parseSingle quotes)
-
+-- | Parse a line and gets all placeholders in it.
 parseSingle :: Quotes -> Parser String
 parseSingle (start, end) = parseUntil start *> parseUntil end
 
 rmdups ::  [String] -> [String]
 rmdups = map head . group . sort
 
+placeholderFromString :: String -> Placeholder
+placeholderFromString = (`Placeholder` Nothing) 
 
 
 
