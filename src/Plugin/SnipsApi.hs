@@ -15,8 +15,8 @@ import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), Placeholder (Placeholder, key, value))
-import Plugin.Text.Text (extractPlaceholders, replaceInText)
+import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, put, Quotes, get, runState)
+import Plugin.Text.Text (extractPlaceholders, replaceInText, addPlaceholdersToState)
 
 
 -- :lua print(vim.o.filetype) gets the currentfiletype
@@ -48,8 +48,11 @@ snipsSave _ = do
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   snippet <- liftIO $ loadSnippet snippetName
-  quotes <- asks quotes
-  let placeholders = extractPlaceholders snippet quotes
+  quotes <- asks Plugin.Environment.SnipsEnvironment.quotes
+  let state = PS snippet quotes []
+  let placeholders = runState $ transformPlaceholders state
+
+
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
   -- TODO why is this not opening immedediately?
   buffer_insert buffer 0 (content snippet)
@@ -58,6 +61,14 @@ handleTelescopeSelection _ snippetName = do
   let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) quotes
   buffer_insert buffer 0 replacedText
   pure ()
+
+
+
+
+transformPlaceholders :: PlaceholderST [Placeholder]
+transformPlaceholders = do
+  addPlaceholdersToState
+  fmap placeholders get
 
 
 placeholderReplacements :: [Placeholder] -> SnipsNvim [Placeholder]

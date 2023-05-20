@@ -1,17 +1,16 @@
 {-# LANGUAGE TupleSections #-}
 
-module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderST, modify, get, put, runState) where
+module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, modify, get, put, runState) where
 
-data Snippet = Snippet { name :: String, content :: [String] }
-
-
+data Snippet = Snippet { name :: String, content :: [String] } deriving Show
 
 -- State
 data Placeholder = Placeholder { key :: String, value :: Maybe String } deriving Show
 type Quotes = (String, String)
-data PlaceholderState = PS { quotes :: Quotes, placeHolders :: [Placeholder] } deriving Show
 
-type PlaceholderST = ST PlaceholderState String
+data PlaceholderState = PS { snippet :: Snippet, quotes :: Quotes, placeholders :: [Placeholder] } deriving Show
+
+type PlaceholderST a = ST PlaceholderState a
 
 newtype ST s a = S (s -> (a, s))
 runState :: ST s a -> s -> (a, s)

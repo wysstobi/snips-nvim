@@ -3,7 +3,7 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, Placeholder(..))
+import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, PlaceholderState(..), Placeholder(..), get, put)
 import Data.Char (isDigit)
 import GHC.Unicode (isAlphaNum)
 import Control.Applicative
@@ -12,33 +12,46 @@ import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
 
-extractPlaceholders :: Snippet -> Quotes -> [Placeholder]
-extractPlaceholders (Snippet _ content) = do
-   map (`Placeholder` Nothing) . rmdups . placeholdersInList content
-  -- modify (\_ -> map (`Placeholder` Nothing) placeholders)
-  -- pure $ mconcat content
+-- find placeholders
+extractPlaceholders :: PlaceholderST [Placeholder]
+extractPlaceholders = do
+   placeholders <- placeholdersInList []
+   return $ map (`Placeholder` Nothing) . rmdups $ placeholders
 
-placeholdersInList :: [String] -> Quotes -> [String]
-placeholdersInList lines quotes = placeholdersInList' lines [] where
-  placeholdersInList' (a:as) found = found ++ placeholdersInLine a quotes ++ placeholdersInList' as found
-  placeholdersInList' [] found = found
+placeholdersInList :: [String] -> PlaceholderST [String]
+placeholdersInList found = do
+  PS (Snippet name content) qs placeholders <- get
+  if null content then
+    return found
+  else do
+    psInLine <- placeholdersInLine
+    PS s qs placeholders <- get
+    psInCurrentline <- placeholdersInLine
+    placeholdersInList (found ++ psInCurrentline)
 
-
-placeholdersInLine :: String -> Quotes -> [String]
-placeholdersInLine line quotes = case parseLine quotes line of
+placeholdersInLine :: PlaceholderST [String]
+placeholdersInLine = do 
+  PS (Snippet name content) qs placeholders <- get
+  put $ PS (Snippet name $ tail content) qs placeholders
+  let res = case parseLine qs (head content) of
                         Just (res, _) -> res
                         Nothing       -> []
+  return res
 
 parseLine :: Quotes -> String -> Maybe ([String], String)
 parseLine quotes = parse (many $ parseSingle quotes)
 
-
 parseSingle :: Quotes -> Parser String
 parseSingle (start, end) = parseUntil start *> parseUntil end
 
-rmdups :: (Ord a) => [a] -> [a]
+rmdups ::  [String] -> [String]
 rmdups = map head . group . sort
 
+
+
+
+
+-- replace
 
 replaceNext :: [Placeholder] -> Quotes -> Parser String
 replaceNext placeholders (start, end) = do
