@@ -6,7 +6,7 @@ module Plugin.SnipsApi
 
 import Neovim
 import GHC.Conc
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
+import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath, quotes))
 import Neovim.API.String
 import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
@@ -48,12 +48,14 @@ snipsSave _ = do
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   snippet <- liftIO $ loadSnippet snippetName
-  let placeholders = extractPlaceholders snippet ("<#", "#>")
+  quotes <- asks quotes
+  let placeholders = extractPlaceholders snippet quotes
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
-  -- buffer_insert buffer 0 (content snippet)
+  -- TODO why is this not opening immedediately?
+  buffer_insert buffer 0 (content snippet)
   replacements <- placeholderReplacements placeholders
   let text = replaceInText replacements (content snippet)
-  let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) ("<#", "#>")
+  let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) quotes
   buffer_insert buffer 0 replacedText
   pure ()
 

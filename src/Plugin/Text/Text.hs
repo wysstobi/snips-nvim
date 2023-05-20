@@ -3,7 +3,7 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceholderT, modify, Placeholder(..))
+import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, Placeholder(..))
 import Data.Char (isDigit)
 import GHC.Unicode (isAlphaNum)
 import Control.Applicative
@@ -11,10 +11,9 @@ import Plugin.Text.Parsers (sat, string, parseUntil, Parser, parse)
 import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
-type Quotes = (String, String)
 
 extractPlaceholders :: Snippet -> Quotes -> [Placeholder]
-extractPlaceholders (Snippet _ content) =
+extractPlaceholders (Snippet _ content) = do
    map (`Placeholder` Nothing) . rmdups . placeholdersInList content
   -- modify (\_ -> map (`Placeholder` Nothing) placeholders)
   -- pure $ mconcat content
