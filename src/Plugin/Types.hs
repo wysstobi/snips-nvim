@@ -7,7 +7,7 @@ data Snippet = Snippet { name :: String, content :: [String] }
 
 
 -- State
-data PlaceHolder = PlaceHolder { key :: String, value :: Maybe String }
+data PlaceHolder = PlaceHolder { key :: String, value :: Maybe String } deriving Show
 type PlaceHolderT = ST [PlaceHolder] String
 
 newtype ST s a = S (s -> (a, s))

@@ -11,11 +11,12 @@ import Neovim.API.String
 import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
 import Data.List (intercalate)
+import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), PlaceHolder (PlaceHolder, key))
-import Plugin.Text.Text (extractPlaceHolders)
+import Plugin.Types  (Snippet(..), PlaceHolder (PlaceHolder, key, value))
+import Plugin.Text.Text (extractPlaceHolders, replaceInText)
 
 
 -- :lua print(vim.o.filetype) gets the currentfiletype
@@ -47,16 +48,15 @@ snipsSave _ = do
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   snippet <- liftIO $ loadSnippet snippetName
-  let placeHolders = extractPlaceHolders snippet ("<#", "#>")
+  let placeholders = extractPlaceHolders snippet ("<#", "#>")
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
-  buffer_insert buffer 0 (content snippet)
-  replacements <- placeHoderReplacements placeHolders
+  -- buffer_insert buffer 0 (content snippet)
+  replacements <- placeHoderReplacements placeholders
   let text = replaceInText replacements (content snippet)
-  -- TODO replace Placeholders in buffer
+  let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) ("<#", "#>")
+  buffer_insert buffer 0 replacedText
   pure ()
 
-replaceInText :: [PlaceHolder] -> [String] -> String
-replaceInText = undefined
 
 placeHoderReplacements :: [PlaceHolder] -> SnipsNvim [PlaceHolder]
 placeHoderReplacements = placeHoderReplacements' [] where
