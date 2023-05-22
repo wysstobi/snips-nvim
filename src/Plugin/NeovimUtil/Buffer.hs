@@ -1,4 +1,4 @@
-module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste) where
+module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer) where
 
 import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
 import Neovim.API.String
@@ -21,4 +21,10 @@ readAndPaste :: Buffer -> Buffer -> Int -> Int -> SnipsNvim ()
 readAndPaste readBuf writeBuf from to = do
   lines <- buffer_get_lines readBuf (fromIntegral from -1) (fromIntegral to) True
   buffer_insert writeBuf 0 lines
-  return ()
+
+clearBuffer :: Buffer -> SnipsNvim ()
+clearBuffer buffer = do 
+  lineCount <- buffer_line_count buffer
+  clearBuffer' lineCount where
+    clearBuffer' 0 = pure ()
+    clearBuffer' lineCount = buffer_del_line buffer 0 

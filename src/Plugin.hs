@@ -26,7 +26,7 @@ plugin = do
             $(function' 'fprodTeam) Sync, 
             $(command' 'snipsCreate) [CmdRange WholeFile],
             $(command' 'snipsSave) [CmdRange WholeFile],
-            $(command' 'handleTelescopeSelection) [], 
+            $(command' 'handleTelescopeSelection) [CmdSync Async], 
             $(command' 'snips) [], 
             $(function' 'nextRandom) Sync,
             $(function "SetNextRandom" 'setNextRandom) Async

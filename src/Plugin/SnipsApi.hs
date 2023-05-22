@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Plugin.SnipsApi
-    ( snipsCreate, snipsSave, handleTelescopeSelection, snips
-    ) where
+    ( snipsCreate, snipsSave, handleTelescopeSelection, snips) where
 
 import Neovim
 import GHC.Conc
@@ -12,7 +11,7 @@ import Control.Monad (when, guard)
 import Data.String (IsString(fromString))
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
-import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste)
+import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
 import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, put, Quotes, get, runState)
@@ -52,15 +51,14 @@ handleTelescopeSelection _ snippetName = do
   let state = PS snippet quotes []
   let placeholders = fst $ runState extractPlaceholders state
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
-  -- TODO why is this not opening immedediately?
   buffer_insert buffer 0 (content snippet)
   replacements <- placeholderReplacements placeholders
   let newState = PS snippet quotes replacements
   let text = fst $ runState replaceInText newState
   let replacedText = fromMaybe [] text
+  clearBuffer buffer 
   buffer_insert buffer 0 replacedText
   pure ()
-
 
 
 placeholderReplacements :: [Placeholder] -> SnipsNvim [Placeholder]
@@ -68,12 +66,10 @@ placeholderReplacements = placeholderReplacements' [] where
   placeholderReplacements' :: [Placeholder] -> [Placeholder] -> SnipsNvim [Placeholder]
   placeholderReplacements' results [] = pure results
   placeholderReplacements' results (p:laceholders) = do
-    let prompt = "Enter a text which replaces: "  ++ key p
+    let prompt = "Enter a text which replaces \""  ++ key p ++ "\":"
     replacement <- askForString prompt Nothing
     let newResults = results ++ [Placeholder (key p) (Just replacement)]
     placeholderReplacements' newResults laceholders
-
-
 
 -- | Opens a @Telescope@ finder to select a snippet to insert
 snips :: CommandArguments -> SnipsNvim ()
