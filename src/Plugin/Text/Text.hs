@@ -3,7 +3,7 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, PlaceholderState(..), Placeholder(..) )
+import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, PlaceholderState(..), Placeholder(..) )
 import Data.Char (isDigit)
 import GHC.Unicode (isAlphaNum)
 import Control.Applicative
