@@ -7,7 +7,6 @@ module Plugin
 
 import Neovim
 
-import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
 import Plugin.SnipsApi(snipsCreate, snipsSave, handleTelescopeSelection, snips)
@@ -18,17 +17,14 @@ import Plugin.Types (SnipsEnv(..))
 
 plugin :: Neovim () NeovimPlugin
 plugin = do
-    randomPluginState <- randomNumbers
     wrapPlugin Plugin
-        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/", qs = ("<#", "#>") },
+        { environment = SnipsEnv { names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/", qs = ("<#", "#>") },
           exports = [ 
             $(function' 'fibonacci) Sync, 
             $(function' 'fprodTeam) Sync, 
-            $(command' 'snipsCreate) [CmdRange WholeFile],
-            $(command' 'snipsSave) [CmdRange WholeFile],
-            $(command' 'handleTelescopeSelection) [CmdSync Async], 
-            $(command' 'snips) [], 
-            $(function' 'nextRandom) Sync,
-            $(function "SetNextRandom" 'setNextRandom) Async
+            $(command'  'snipsCreate) [CmdRange WholeFile],
+            $(command'  'snipsSave) [CmdRange WholeFile],
+            $(command'  'handleTelescopeSelection) [CmdSync Async], 
+            $(command'  'snips) []
           ]
         }

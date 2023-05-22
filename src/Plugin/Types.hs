@@ -7,7 +7,7 @@ import GHC.Conc (TVar)
 -- Environment
 type Quotes = (String, String)
 -- TODO: remove randomState
-data SnipsEnv = SnipsEnv { randomState :: TVar [Int16], names :: String, snippetPath :: String, qs :: Quotes }
+data SnipsEnv = SnipsEnv { names :: String, snippetPath :: String, qs :: Quotes }
 
 type SnipsNvim a = Neovim SnipsEnv a
 data Snippet = Snippet { name :: String, content :: [String] } deriving Show

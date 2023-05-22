@@ -27,7 +27,6 @@ executable snips
                      , Plugin.Types
                      , Plugin.Text.Text
                      , Plugin.Text.Parsers
-                     , Plugin.Random
                      , Plugin.FprodTeam
                      , Plugin.SnipsApi
                      , Plugin.FileIO.FileIO
