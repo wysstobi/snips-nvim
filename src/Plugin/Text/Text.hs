@@ -12,17 +12,16 @@ import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
 
--- find placeholders
+-- | find placeholders
 extractPlaceholders :: PlaceholderST [Placeholder]
-extractPlaceholders = do
-   placeholders <- placeholdersInList [] -- gets all placeholders in the snippet which is in the state
-   return $ map placeholderFromString . rmdups $ placeholders -- remove duplicates
+extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList [] 
+
 
 -- | Gets all placeholders from the list in the state.
 placeholdersInList :: [String] -> PlaceholderST [String]
 placeholdersInList found = do
   PS (Snippet name content) qs placeholders <- get
-  -- if content ins empty, we are done
+  -- if content is empty, we are done
   if null content then
     return found
   else do
@@ -34,7 +33,7 @@ placeholdersInList found = do
 
 -- | Gets all placeholders in the current line.
 placeholdersInLine :: String -> PlaceholderST [String]
-placeholdersInLine line = do 
+placeholdersInLine line = do
   PS (Snippet name content) qs placeholders <- get
   let parsed = parse (many $ parseSingle qs) line
   let res = case parsed of
@@ -46,14 +45,11 @@ placeholdersInLine line = do
 parseSingle :: Quotes -> Parser String
 parseSingle (start, end) = parseUntil start *> parseUntil end
 
-rmdups ::  [String] -> [String]
-rmdups = map head . group . sort
+placeholderSetFromStrings :: [String] -> [Placeholder]
+placeholderSetFromStrings = map (`Placeholder` Nothing) . setFromList
 
-placeholderFromString :: String -> Placeholder
-placeholderFromString = (`Placeholder` Nothing) 
-
-
-
+setFromList :: Ord a => [a] -> [a]
+setFromList = map head . group . sort
 
 -- replace
 
