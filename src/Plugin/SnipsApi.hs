@@ -7,18 +7,20 @@ import Neovim
 import GHC.Conc
 import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath, quotes))
 import Neovim.API.String
-import Control.Monad (when, guard)
+import Control.Monad (when, guard, liftM2, liftM3)
 import Data.String (IsString(fromString))
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, put, Quotes, get, runState)
+import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, runState, PlaceholderSTOld)
 import Plugin.Text.Text (extractPlaceholders, replaceInText)
+import Control.Monad.Trans.State (StateT(runStateT), get, put)
+import Control.Monad.Trans.Class
 
 
--- :lua print(vim.o.filetype) gets the currentfiletype
+-- :lua print(vim.o.filetype) gets the currentfiletypefile
 
 -- | Opens a new buffer containing the currently selected text.
 snipsCreate :: CommandArguments -> SnipsNvim ()
@@ -26,6 +28,7 @@ snipsCreate CommandArguments { range = _range }  =
   case _range of
     (Just (l1, l2)) -> do
       cb <- vim_get_current_buffer
+      
       newBuffer <- createNewBuf "Create new snippet" Nothing
 
       readAndPaste cb newBuffer l1 l2
@@ -43,33 +46,37 @@ snipsSave _ = do
   liftIO $ writeFile (path ++ snippetName ++ ".json") (foldr (\cur acc -> cur ++ "\n" ++ acc) "" bufferContent)
   vim_command "bd!"
 
-
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
-handleTelescopeSelection _ snippetName = do
-  snippet <- liftIO $ loadSnippet snippetName
+handleTelescopeSelection _ snippetName = do 
   quotes <- asks Plugin.Environment.SnipsEnvironment.quotes
+  snippet <- liftIO $ loadSnippet snippetName
   let state = PS snippet quotes []
-  let placeholders = fst $ runState extractPlaceholders state
-  buffer <- createNewBuf ("Insert " <> name snippet) Nothing
-  buffer_insert buffer 0 (content snippet)
-  replacements <- placeholderReplacements placeholders
-  let newState = PS snippet quotes replacements
-  let text = fst $ runState replaceInText newState
-  let replacedText = fromMaybe [] text
-  clearBuffer buffer 
-  buffer_insert buffer 0 replacedText
-  pure ()
+  fst <$> runStateT (replacePlaceholders snippet) state
 
+replacePlaceholders :: Snippet -> PlaceholderST ()
+replacePlaceholders snippet = do
+  placeholders <- extractPlaceholders 
+  buffer <- lift $ createNewBuf ("Insert " <> name snippet) Nothing
+  lift $ buffer_insert buffer 0 (content snippet)
+  replacements <- lift $ placeholderReplacements placeholders
+  PS (Snippet name content) quotes _ <- get
+  put $ PS (Snippet name content) quotes replacements
+  text <- replaceInText 
+
+  let replacedText = fromMaybe [] text
+  lift $ clearBuffer buffer 
+  lift $ buffer_insert buffer 0 replacedText
+  pure ()
 
 placeholderReplacements :: [Placeholder] -> SnipsNvim [Placeholder]
 placeholderReplacements = placeholderReplacements' [] where
   placeholderReplacements' :: [Placeholder] -> [Placeholder] -> SnipsNvim [Placeholder]
   placeholderReplacements' results [] = pure results
-  placeholderReplacements' results (p:laceholders) = do
-    let prompt = "Enter a text which replaces \""  ++ key p ++ "\":"
+  placeholderReplacements' results (current:rest) = do
+    let prompt = "Enter a text which replaces \""  ++ key current ++ "\":"
     replacement <- askForString prompt Nothing
-    let newResults = results ++ [Placeholder (key p) (Just replacement)]
-    placeholderReplacements' newResults laceholders
+    let newResults = results ++ [Placeholder (key current) (Just replacement)]
+    placeholderReplacements' newResults rest
 
 -- | Opens a @Telescope@ finder to select a snippet to insert
 snips :: CommandArguments -> SnipsNvim ()

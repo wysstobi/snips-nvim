@@ -3,7 +3,7 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, PlaceholderState(..), Placeholder(..), get, put)
+import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, modify, PlaceholderState(..), Placeholder(..) )
 import Data.Char (isDigit)
 import GHC.Unicode (isAlphaNum)
 import Control.Applicative
@@ -11,24 +11,24 @@ import Plugin.Text.Parsers (sat, string, parseUntil, Parser, parse)
 import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
+import Control.Monad.Trans.State (get, put)
 
 -- | find placeholders
 extractPlaceholders :: PlaceholderST [Placeholder]
-extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList []
+extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList
 
--- | Gets all placeholders from the list in the state.
-placeholdersInList :: [String] -> PlaceholderST [String]
-placeholdersInList found = do
+-- | Gets all placeholders from the text in the state.
+placeholdersInList :: PlaceholderST [String] 
+placeholdersInList = do 
   PS (Snippet name content) qs placeholders <- get
-  -- if content is empty, we are done
-  if null content then
-    return found
-  else do
-    -- save the rest of the content in the state
-    put $ PS (Snippet name $ tail content) qs placeholders
-    -- search the first line for placeholders
-    psInLine <- placeholdersInLine (head content)
-    placeholdersInList (found ++ psInLine)
+  placeholdersInList' content [] where
+    placeholdersInList' :: [String] -> [String] -> PlaceholderST [String]
+    placeholdersInList' [] found = pure found
+    placeholdersInList' (line:rest) found = do
+      PS (Snippet name _) qs placeholders <- get
+      psInLine <- placeholdersInLine line
+      placeholdersInList' rest (found ++ psInLine)
+
 
 -- | Gets all placeholders in the current line.
 placeholdersInLine :: String -> PlaceholderST [String]
@@ -74,7 +74,7 @@ replaceInLine = do
   PS (Snippet name content) qs placeholders <- get
   let (line:rest) = content
   put $ PS (Snippet name rest) qs placeholders
-  let parsed = parse (many (replaceNext placeholders qs))  line
+  let parsed = parse (many (replaceNext placeholders qs)) line
   pure (mconcat . fst <$> parsed) 
 
 getReplacementForKey :: [Placeholder] -> String -> String

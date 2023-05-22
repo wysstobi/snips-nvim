@@ -2,6 +2,7 @@ module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer) where
 
 import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
 import Neovim.API.String
+import Neovim.Classes (NvimObject(fromObjectUnsafe))
 
 createNewBuf :: String -> Maybe Buffer -> SnipsNvim Buffer
 createNewBuf bufferName focus = case focus of
@@ -27,4 +28,6 @@ clearBuffer buffer = do
   lineCount <- buffer_line_count buffer
   clearBuffer' lineCount where
     clearBuffer' 0 = pure ()
-    clearBuffer' lineCount = buffer_del_line buffer 0 
+    clearBuffer' lineCount = do
+      buffer_del_line buffer (lineCount -1)
+      clearBuffer' (lineCount -1)

@@ -3,7 +3,7 @@ import Plugin.Types  (Snippet(..))
 
 
 sampleData :: [Snippet]
-sampleData = [Snippet "MySnippet" ["hello <#Title#>"], Snippet "Andris Snippet" ["bye <#Title#>"]]
+sampleData = [Snippet "MySnippet" ["hello <#Title#>", "bye <#Title#>"], Snippet "Andris Snippet" ["bye <#Title#>"]]
 
 allSnippets :: [Snippet]
 allSnippets = sampleData

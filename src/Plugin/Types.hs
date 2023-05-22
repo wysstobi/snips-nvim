@@ -1,6 +1,9 @@
 {-# LANGUAGE TupleSections #-}
 
-module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, modify, get, put, runState) where
+module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, PlaceholderSTOld, modify, get, put, runState) where
+import Control.Monad.Trans.State (StateT)
+import Plugin.Environment.SnipsEnvironment (SnipsNvim, SnipsEnv)
+import Neovim
 
 data Snippet = Snippet { name :: String, content :: [String] } deriving Show
 
@@ -10,8 +13,10 @@ type Quotes = (String, String)
 
 data PlaceholderState = PS { snippet :: Snippet, quotes :: Quotes, placeholders :: [Placeholder] } deriving Show
 
-type PlaceholderST a = ST PlaceholderState a
+type PlaceholderSTOld a  = ST PlaceholderState a
+type PlaceholderST a = StateT PlaceholderState (Neovim SnipsEnv) a
 
+-- Copied from lecture
 newtype ST s a = S (s -> (a, s))
 runState :: ST s a -> s -> (a, s)
 runState (S t) = t
