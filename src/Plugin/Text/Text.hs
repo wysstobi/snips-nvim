@@ -72,9 +72,10 @@ replaceNext placeholders (start, end) = do
 replaceInLine :: PlaceholderST (Maybe String)
 replaceInLine = do
   PS (Snippet name content) qs placeholders <- get
-  put $ PS (Snippet name (tail content)) qs placeholders
-  let parsed = parse (many (replaceNext placeholders qs)) $ head content
-  pure (mconcat . fst <$> parsed)
+  let (line:rest) = content
+  put $ PS (Snippet name rest) qs placeholders
+  let parsed = parse (many (replaceNext placeholders qs))  line
+  pure (mconcat . fst <$> parsed) 
 
 getReplacementForKey :: [Placeholder] -> String -> String
 getReplacementForKey [] _ = ""
