@@ -1,8 +1,8 @@
 module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer) where
 
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
 import Neovim.API.String
 import Neovim.Classes (NvimObject(fromObjectUnsafe))
+import Plugin.Types (SnipsNvim)
 
 createNewBuf :: String -> Maybe Buffer -> SnipsNvim Buffer
 createNewBuf bufferName focus = case focus of

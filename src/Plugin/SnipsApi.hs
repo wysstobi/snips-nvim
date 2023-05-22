@@ -5,7 +5,6 @@ module Plugin.SnipsApi
 
 import Neovim
 import GHC.Conc
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath, quotes))
 import Neovim.API.String
 import Control.Monad (when, guard, liftM2, liftM3)
 import Data.String (IsString(fromString))
@@ -14,7 +13,7 @@ import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, PlaceholderSTOld)
+import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, PlaceholderSTOld, SnipsNvim, names, SnipsEnv (qs, snippetPath))
 import Plugin.Text.Text (extractPlaceholders, replaceInText)
 import Control.Monad.Trans.State (StateT(runStateT), get, put)
 import Control.Monad.Trans.Class
@@ -47,7 +46,7 @@ snipsSave _ = do
 -- | Handles the selection of a snippetname by telescope
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do 
-  quotes <- asks Plugin.Environment.SnipsEnvironment.quotes
+  quotes <- asks qs
   snippet <- liftIO $ loadSnippet snippetName
   let state = PS snippet quotes []
   fst <$> runStateT (replacePlaceholders snippet) state

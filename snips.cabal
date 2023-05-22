@@ -33,7 +33,6 @@ executable snips
                      , Plugin.FileIO.FileIO
                      , Plugin.NeovimUtil.Input
                      , Plugin.NeovimUtil.Buffer
-                     , Plugin.Environment.SnipsEnvironment
   build-depends:       base >= 4.7 && < 5
                      , nvim-hs >= 2 && < 3
                      , transformers == 0.5.6.2

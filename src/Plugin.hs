@@ -11,16 +11,16 @@ import Plugin.Random (nextRandom, setNextRandom, randomNumbers)
 import Plugin.Fibonacci(fibonacci)
 import Plugin.FprodTeam(fprodTeam)
 import Plugin.SnipsApi(snipsCreate, snipsSave, handleTelescopeSelection, snips)
-import Plugin.Environment.SnipsEnvironment
 import GHC.Conc
 import Neovim.Plugin.Classes (mkCommandOptions, CommandOption (CmdNargs))
+import Plugin.Types (SnipsEnv(..))
 
 
 plugin :: Neovim () NeovimPlugin
 plugin = do
     randomPluginState <- randomNumbers
     wrapPlugin Plugin
-        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/", quotes = ("<#", "#>") },
+        { environment = SnipsEnv { randomState = randomPluginState, names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/", qs = ("<#", "#>") },
           exports = [ 
             $(function' 'fibonacci) Sync, 
             $(function' 'fprodTeam) Sync, 

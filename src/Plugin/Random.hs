@@ -8,8 +8,7 @@ module Plugin.Random
 import Neovim
 import System.Random (newStdGen, randoms)
 import UnliftIO.STM  (TVar, atomically, readTVar, modifyTVar, newTVarIO)
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, SnipsEnv (randomState))
-
+import Plugin.Types(SnipsNvim, randomState)
 -- | This type alias encodes the type of your plugin's environment, namely
 -- '(TVar [Int16)' in this case.
 --

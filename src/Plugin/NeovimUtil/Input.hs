@@ -1,8 +1,8 @@
 module Plugin.NeovimUtil.Input ( askForString ) where
 
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, names, SnipsEnv (snippetPath))
 import Neovim.API.String
 import Neovim
+import Plugin.Types (SnipsNvim)
 
 -- | Helper function that calls the @input()@ function of neovim.
 input :: NvimObject result

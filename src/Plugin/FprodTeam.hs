@@ -7,9 +7,9 @@ module Plugin.FprodTeam
 
 import Neovim
 import GHC.Conc
-import Plugin.Environment.SnipsEnvironment (SnipsNvim, names)
 import Neovim.API.String
 import Control.Monad (when)
+import Plugin.Types(SnipsNvim, SnipsEnv (..))
 
 fprodTeam :: SnipsNvim String
 fprodTeam = asks names
