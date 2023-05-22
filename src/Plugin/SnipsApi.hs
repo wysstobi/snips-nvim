@@ -51,13 +51,13 @@ handleTelescopeSelection _ snippetName = do
   quotes <- asks Plugin.Environment.SnipsEnvironment.quotes
   let state = PS snippet quotes []
   let placeholders = fst $ runState extractPlaceholders state
-
   buffer <- createNewBuf ("Insert " <> name snippet) Nothing
   -- TODO why is this not opening immedediately?
   buffer_insert buffer 0 (content snippet)
   replacements <- placeholderReplacements placeholders
-  let text = replaceInText replacements (content snippet)
-  let replacedText = fromMaybe [] $ replaceInText replacements (content snippet) quotes
+  let newState = PS snippet quotes replacements
+  let text = fst $ runState replaceInText newState
+  let replacedText = fromMaybe [] text
   buffer_insert buffer 0 replacedText
   pure ()
 

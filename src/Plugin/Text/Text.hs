@@ -14,8 +14,7 @@ import Data.Maybe(fromMaybe)
 
 -- | find placeholders
 extractPlaceholders :: PlaceholderST [Placeholder]
-extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList [] 
-
+extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList []
 
 -- | Gets all placeholders from the list in the state.
 placeholdersInList :: [String] -> PlaceholderST [String]
@@ -52,21 +51,30 @@ setFromList :: Ord a => [a] -> [a]
 setFromList = map head . group . sort
 
 -- replace
+replaceInText :: PlaceholderST (Maybe [String])
+replaceInText = do
+  PS (Snippet _ content) _ _ <- get
+  -- if content is empty, we are done
+  if null content then pure $ Just []
+  else do
+    currentLine <- replaceInLine
+    rest        <- replaceInText
+    pure $ (:) <$> currentLine <*> rest
+
 
 replaceNext :: [Placeholder] -> Quotes -> Parser String
 replaceNext placeholders (start, end) = do
   before <- parseUntil start
-  found <- parseUntil end
+  found  <- parseUntil end
   let replacement = getReplacementForKey placeholders found
   return (before ++ replacement)
 
-replaceInLine :: [Placeholder] -> Quotes -> String -> Maybe String
-replaceInLine placeholders quotes line = mconcat . fst <$> parse (many (replaceNext placeholders quotes)) line
-
-replaceInText :: [Placeholder] -> [String] -> Quotes -> Maybe [String]
-replaceInText placeholders [] _ =  Just []
-replaceInText placeholders (l:ine) quotes = case replaceInLine placeholders quotes l of
-    Just str -> (++) <$> Just [str] <*> replaceInText placeholders ine quotes
+replaceInLine :: PlaceholderST (Maybe String)
+replaceInLine = do
+  PS (Snippet name content) qs placeholders <- get
+  put $ PS (Snippet name (tail content)) qs placeholders
+  let parsed = parse (many (replaceNext placeholders qs)) $ head content
+  pure (mconcat . fst <$> parsed)
 
 getReplacementForKey :: [Placeholder] -> String -> String
 getReplacementForKey [] _ = ""
@@ -78,3 +86,9 @@ getReplacementForKey ((Placeholder key value):ps) placeholder =
       getReplacementForKey ps placeholder
 
 
+-- TODO: remove or use
+replaceNext2 :: PlaceholderST [Placeholder]
+replaceNext2 = do
+  PS (Snippet _ content) (start, end) placeholders <- get
+  let found = parse (parseUntil start *> parseUntil end) (head content)
+  return []
