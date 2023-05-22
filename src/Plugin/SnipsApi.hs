@@ -28,9 +28,7 @@ snipsCreate CommandArguments { range = _range }  =
   case _range of
     (Just (l1, l2)) -> do
       cb <- vim_get_current_buffer
-      
       newBuffer <- createNewBuf "Create new snippet" Nothing
-
       readAndPaste cb newBuffer l1 l2
       return ()
     Nothing -> return ()
@@ -46,6 +44,7 @@ snipsSave _ = do
   liftIO $ writeFile (path ++ snippetName ++ ".json") (foldr (\cur acc -> cur ++ "\n" ++ acc) "" bufferContent)
   vim_command "bd!"
 
+-- | Handles the selection of a snippetname by telescope
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do 
   quotes <- asks Plugin.Environment.SnipsEnvironment.quotes
@@ -53,14 +52,13 @@ handleTelescopeSelection _ snippetName = do
   let state = PS snippet quotes []
   fst <$> runStateT (replacePlaceholders snippet) state
 
+-- | Creates a new buffer and inserts the selected snippet to it
 replacePlaceholders :: Snippet -> PlaceholderST ()
 replacePlaceholders snippet = do
   placeholders <- extractPlaceholders 
   buffer <- lift $ createNewBuf ("Insert " <> name snippet) Nothing
   lift $ buffer_insert buffer 0 (content snippet)
-  replacements <- lift $ placeholderReplacements placeholders
-  PS (Snippet name content) quotes _ <- get
-  put $ PS (Snippet name content) quotes replacements
+  replacements <- askForPlaceholderReplacements placeholders
   text <- replaceInText 
 
   let replacedText = fromMaybe [] text
@@ -68,15 +66,15 @@ replacePlaceholders snippet = do
   lift $ buffer_insert buffer 0 replacedText
   pure ()
 
-placeholderReplacements :: [Placeholder] -> SnipsNvim [Placeholder]
-placeholderReplacements = placeholderReplacements' [] where
-  placeholderReplacements' :: [Placeholder] -> [Placeholder] -> SnipsNvim [Placeholder]
-  placeholderReplacements' results [] = pure results
-  placeholderReplacements' results (current:rest) = do
-    let prompt = "Enter a text which replaces \""  ++ key current ++ "\":"
-    replacement <- askForString prompt Nothing
-    let newResults = results ++ [Placeholder (key current) (Just replacement)]
-    placeholderReplacements' newResults rest
+-- | Ask the user for replacements for the placeholders and store it in the state
+askForPlaceholderReplacements :: [Placeholder] -> PlaceholderST ()
+askForPlaceholderReplacements [] = pure ()
+askForPlaceholderReplacements (current:rest) = do
+  PS (Snippet name content) qs rs <- get
+  let prompt = "Enter a text which replaces \""  ++ key current ++ "\":"
+  replacement <- lift $ askForString prompt Nothing
+  put $ PS (Snippet name content) qs (rs ++ [Placeholder (key current) (Just replacement)])
+  askForPlaceholderReplacements rest
 
 -- | Opens a @Telescope@ finder to select a snippet to insert
 snips :: CommandArguments -> SnipsNvim ()
