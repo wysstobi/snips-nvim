@@ -13,7 +13,7 @@ import Data.Maybe (fromMaybe)
 import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
-import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, PlaceholderSTOld, SnipsNvim, names, SnipsEnv (qs, snippetPath))
+import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, SnipsNvim, names, SnipsEnv (qs, snippetPath))
 import Plugin.Text.Text (extractPlaceholders, replaceInText)
 import Control.Monad.Trans.State (StateT(runStateT), get, put)
 import Control.Monad.Trans.Class

@@ -1,5 +1,4 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use execState" #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Plugin.Text.Text where
 
@@ -11,18 +10,20 @@ import Plugin.Text.Parsers (sat, string, parseUntil, Parser, parse)
 import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
-import Control.Monad.Trans.State (get, put)
+--import Control.Monad.Trans.State (get, put)
+import Control.Monad.State.Class (MonadState)
+import Control.Monad.RWS.Class (MonadState(..))
 
 -- | find placeholders
-extractPlaceholders :: PlaceholderST [Placeholder]
+extractPlaceholders :: (MonadState PlaceholderState m) => m [Placeholder]
 extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList
 
 -- | Gets all placeholders from the text in the state.
-placeholdersInList :: PlaceholderST [String] 
+placeholdersInList :: (MonadState PlaceholderState m) => m [String] 
 placeholdersInList = do 
   PS (Snippet name content) qs placeholders <- get
   placeholdersInList' content [] where
-    placeholdersInList' :: [String] -> [String] -> PlaceholderST [String]
+    placeholdersInList' :: (MonadState PlaceholderState m) => [String] -> [String] ->  m [String]
     placeholdersInList' [] found = pure found
     placeholdersInList' (line:rest) found = do
       PS (Snippet name _) qs placeholders <- get
@@ -31,7 +32,7 @@ placeholdersInList = do
 
 
 -- | Gets all placeholders in the current line.
-placeholdersInLine :: String -> PlaceholderST [String]
+placeholdersInLine :: (MonadState PlaceholderState m) => String ->  m [String]
 placeholdersInLine line = do
   PS (Snippet name content) qs placeholders <- get
   let parsed = parse (many $ parseSingle qs) line
@@ -50,8 +51,7 @@ placeholderSetFromStrings = map (`Placeholder` Nothing) . setFromList
 setFromList :: Ord a => [a] -> [a]
 setFromList = map head . group . sort
 
--- replace
-replaceInText :: PlaceholderST (Maybe [String])
+replaceInText :: (MonadState PlaceholderState m) => m (Maybe [String])
 replaceInText = do
   PS (Snippet _ content) _ _ <- get
   -- if content is empty, we are done
@@ -69,7 +69,7 @@ replaceNext placeholders (start, end) = do
   let replacement = getReplacementForKey placeholders found
   return (before ++ replacement)
 
-replaceInLine :: PlaceholderST (Maybe String)
+replaceInLine :: (MonadState PlaceholderState m) => m (Maybe String)
 replaceInLine = do
   PS (Snippet name content) qs placeholders <- get
   let (line:rest) = content

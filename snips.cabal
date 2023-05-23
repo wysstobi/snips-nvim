@@ -35,6 +35,7 @@ executable snips
   build-depends:       base >= 4.7 && < 5
                      , nvim-hs >= 2 && < 3
                      , transformers == 0.5.6.2
+                     , mtl >= 2.2.2 && < 2.3.1
                      -- The dependencies below are only needed for the example plugin
                      , unliftio
   default-language:    Haskell2010
