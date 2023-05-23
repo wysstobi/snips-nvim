@@ -19,8 +19,8 @@ extractPlaceholders :: (MonadState PlaceholderState m) => m [Placeholder]
 extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList
 
 -- | Gets all placeholders from the text in the state.
-placeholdersInList :: (MonadState PlaceholderState m) => m [String] 
-placeholdersInList = do 
+placeholdersInList :: (MonadState PlaceholderState m) => m [String]
+placeholdersInList = do
   PS (Snippet name content) qs placeholders <- get
   placeholdersInList' content [] where
     placeholdersInList' :: (MonadState PlaceholderState m) => [String] -> [String] ->  m [String]
@@ -54,13 +54,12 @@ setFromList = map head . group . sort
 replaceInText :: (MonadState PlaceholderState m) => m (Maybe [String])
 replaceInText = do
   PS (Snippet _ content) _ _ <- get
-  -- if content is empty, we are done
-  if null content then pure $ Just []
-  else do
-    currentLine <- replaceInLine
-    rest        <- replaceInText
-    pure $ (:) <$> currentLine <*> rest
-
+  replaceInText' content where
+    replaceInText' [] = pure $ Just []
+    replaceInText' (line:rest) = do
+      currentLine <- replaceInLine line
+      replacedRest <- replaceInText' rest
+      pure $ (:) <$> currentLine <*> replacedRest
 
 replaceNext :: [Placeholder] -> Quotes -> Parser String
 replaceNext placeholders (start, end) = do
@@ -69,13 +68,11 @@ replaceNext placeholders (start, end) = do
   let replacement = getReplacementForKey placeholders found
   return (before ++ replacement)
 
-replaceInLine :: (MonadState PlaceholderState m) => m (Maybe String)
-replaceInLine = do
+replaceInLine :: (MonadState PlaceholderState m) => String -> m (Maybe String)
+replaceInLine currentLine = do
   PS (Snippet name content) qs placeholders <- get
-  let (line:rest) = content
-  put $ PS (Snippet name rest) qs placeholders
-  let parsed = parse (many (replaceNext placeholders qs)) line
-  pure (mconcat . fst <$> parsed) 
+  let parsed = parse (many (replaceNext placeholders qs)) currentLine
+  pure (mconcat . fst <$> parsed)
 
 getReplacementForKey :: [Placeholder] -> String -> String
 getReplacementForKey [] _ = ""
