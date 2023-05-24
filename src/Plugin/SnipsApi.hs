@@ -10,7 +10,7 @@ import Control.Monad (when, guard, liftM2, liftM3)
 import Data.String (IsString(fromString))
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
-import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer)
+import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer, getCurrentCursorPosition, closeBuffer)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.FileIO.FileIO (loadSnippet, allSnippets)
 import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key, value), PlaceholderST, Quotes, SnipsNvim, names, SnipsEnv (qs, snippetPath))
@@ -28,7 +28,7 @@ snipsCreate CommandArguments { range = _range }  =
     (Just (l1, l2)) -> do
       cb <- vim_get_current_buffer
       newBuffer <- createNewBuf "Create new snippet" Nothing
-      readAndPaste cb newBuffer l1 l2
+      readAndPaste cb newBuffer l1 l2 0
       return ()
     Nothing -> return ()
 
@@ -41,18 +41,22 @@ snipsSave _ = do
   bufferContent <- buffer_get_lines cb 0 lineCount True
   snippetName <- askForString "Enter a name for the snippet:" Nothing
   liftIO $ writeFile (path ++ snippetName ++ ".json") (foldr (\cur acc -> cur ++ "\n" ++ acc) "" bufferContent)
-  vim_command "bd!"
+  closeBuffer cb
 
 -- | Handles the selection of a snippetname by telescope
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do 
+  (buffer, line) <- getCurrentCursorPosition
   quotes <- asks qs
   snippet <- liftIO $ loadSnippet snippetName
   let state = PS snippet quotes []
-  fst <$> runStateT (replacePlaceholders snippet) state
-
+  snipBuffer <- fst <$> runStateT (replacePlaceholders snippet) state
+  linecount <- fromIntegral <$> nvim_buf_line_count snipBuffer 
+  readAndPaste snipBuffer buffer 1 linecount line
+  closeBuffer snipBuffer
+  
 -- | Creates a new buffer and inserts the selected snippet to it
-replacePlaceholders :: Snippet -> PlaceholderST ()
+replacePlaceholders :: Snippet -> PlaceholderST Buffer
 replacePlaceholders snippet = do
   placeholders <- extractPlaceholders 
   buffer <- lift $ createNewBuf ("Insert " <> name snippet) Nothing
@@ -63,7 +67,7 @@ replacePlaceholders snippet = do
   let replacedText = fromMaybe [] text
   lift $ clearBuffer buffer 
   lift $ buffer_insert buffer 0 replacedText
-  pure ()
+  pure buffer
 
 -- | Ask the user for replacements for the placeholders and store it in the state
 askForPlaceholderReplacements :: [Placeholder] -> PlaceholderST ()
