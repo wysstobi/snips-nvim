@@ -1,8 +1,6 @@
 module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, SnipsEnv(..), SnipsNvim ) where
 import Control.Monad.Trans.State (StateT)
 import Neovim
-import Control.Monad.ST.Lazy (ST)
-import GHC.Conc (TVar)
 
 -- Environment
 data SnipsEnv = SnipsEnv { names :: String, snippetPath :: String, qs :: Quotes }

@@ -1,5 +1,6 @@
-import Neovim
+module SnipsLib(main) where
 
+import Neovim
 import qualified Plugin as Snips
 
 main :: IO ()

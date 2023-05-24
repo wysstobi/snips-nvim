@@ -4,6 +4,7 @@ local finders = require "telescope.finders"
 local conf = require("telescope.config").values
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
+local previewers = require "telescope.previewers"
 
 
 function MyFunction (tobi)
@@ -44,18 +45,29 @@ end
 -- local previewer = Previewer:new(opts)
 
 
+-- local previewer = previewers.new_termopen_previewer()
+-- previewer.get_command = function (entry, status)
+--         return {'bat', entry.path}
+-- end
+
 
 --
 --print(vim.inspect(t))
 function run(table)
         local opts = {
                 prompt_title = "best guys ever",
-                layout_strategy = "center",
+                layout_strategy = "horizontal",
+                layout_config = { height = 0.95 },
                 finder = finders.new_table(table),
                 sorter = conf.generic_sorter(),
                 attach_mappings = attach_mappings,
                 entry_maker = marker,
-        }
+                previewer = previewers.new_buffer_previewer {
+                      title = "My preview",
+                      define_preview = function (self, entry, status)
+                              vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {entry[1], "print(\"Hello World\")"})
+                      end
+                }}
         local names = pickers.new(opts)
         names:find()
 end
