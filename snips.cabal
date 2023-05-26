@@ -67,11 +67,10 @@ library
     -- Modules included in this library but not exported.
     other-modules:       Plugin
                        , Plugin.Types
-                       --, Plugin.Text.Text
-                       -- , Plugin.Text.Parsers
                        , Plugin.SnipsApi
                        , Plugin.FileIO.FileIO
                        , Plugin.NeovimUtil.Input
+                       , Plugin.NeovimUtil.Util
                        , Plugin.NeovimUtil.Buffer
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

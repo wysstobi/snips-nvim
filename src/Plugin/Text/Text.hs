@@ -2,15 +2,12 @@
 
 module Plugin.Text.Text where
 
-import Plugin.Types (Snippet(Snippet), PlaceholderST(..), Quotes, PlaceholderState(..), Placeholder(..) )
-import Data.Char (isDigit)
-import GHC.Unicode (isAlphaNum)
+import Plugin.Types (Snippet(Snippet), Quotes, PlaceholderState(..), Placeholder(..) )
 import Control.Applicative
-import Plugin.Text.Parsers (sat, string, parseUntil, Parser, parse)
+import Plugin.Text.Parsers (parseUntil, Parser, parse)
 import Data.List (group, sort)
 import Data.Maybe(fromMaybe)
 
---import Control.Monad.Trans.State (get, put)
 import Control.Monad.State.Class (MonadState)
 import Control.Monad.RWS.Class (MonadState(..))
 
@@ -21,12 +18,11 @@ extractPlaceholders = placeholderSetFromStrings <$> placeholdersInList
 -- | Gets all placeholders from the text in the state.
 placeholdersInList :: (MonadState PlaceholderState m) => m [String]
 placeholdersInList = do
-  PS (Snippet name content) qs placeholders <- get
+  PS (Snippet _ content _) _ _ <- get
   placeholdersInList' content [] where
     placeholdersInList' :: (MonadState PlaceholderState m) => [String] -> [String] ->  m [String]
     placeholdersInList' [] found = pure found
     placeholdersInList' (line:rest) found = do
-      PS (Snippet name _) qs placeholders <- get
       psInLine <- placeholdersInLine line
       placeholdersInList' rest (found ++ psInLine)
 
@@ -34,10 +30,10 @@ placeholdersInList = do
 -- | Gets all placeholders in the current line.
 placeholdersInLine :: (MonadState PlaceholderState m) => String ->  m [String]
 placeholdersInLine line = do
-  PS (Snippet name content) qs placeholders <- get
+  PS _ qs _ <- get
   let parsed = parse (many $ parseSingle qs) line
   let res = case parsed of
-                        Just (res, _) -> res
+                        Just (result, _) -> result
                         Nothing       -> []
   return res
 
@@ -53,7 +49,7 @@ setFromList = map head . group . sort
 
 replaceInText :: (MonadState PlaceholderState m) => m (Maybe [String])
 replaceInText = do
-  PS (Snippet _ content) _ _ <- get
+  PS (Snippet _ content _) _ _ <- get
   replaceInText' content where
     replaceInText' [] = pure $ Just []
     replaceInText' (line:rest) = do
@@ -70,7 +66,7 @@ replaceNext placeholders (start, end) = do
 
 replaceInLine :: (MonadState PlaceholderState m) => String -> m (Maybe String)
 replaceInLine currentLine = do
-  PS (Snippet name content) qs placeholders <- get
+  PS _ qs placeholders <- get
   let parsed = parse (many (replaceNext placeholders qs)) currentLine
   pure (mconcat . fst <$> parsed)
 
@@ -83,10 +79,3 @@ getReplacementForKey ((Placeholder key value):ps) placeholder =
     else
       getReplacementForKey ps placeholder
 
-
--- TODO: remove or use
-replaceNext2 :: PlaceholderST [Placeholder]
-replaceNext2 = do
-  PS (Snippet _ content) (start, end) placeholders <- get
-  let found = parse (parseUntil start *> parseUntil end) (head content)
-  return []
