@@ -101,7 +101,7 @@ snips _ = do
   -- create a table from all existing snippets
   cb <- vim_get_current_buffer
   ft <- getBufferFileType cb
-  let snippets = snippetsOfType ft
+  snippets <- liftIO $ snippetsOfType ft
   let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
 
   let command = "return run({" ++ table ++"})"
