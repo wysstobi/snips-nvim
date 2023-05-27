@@ -1,12 +1,14 @@
-module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, SnipsEnv(..), SnipsNvim ) where
+module Plugin.Types (Quotes, Snippet(..), Placeholder(..), PlaceholderState(..), PlaceholderST, SnipsEnv(..), SnipsNvim, SnippetMetaData(..)) where
 import Control.Monad.Trans.State (StateT)
 import Neovim
 
 -- Environment
 data SnipsEnv = SnipsEnv { names :: String, snippetPath :: String, qs :: Quotes }
 
+newtype SnippetMetaData = SnippetMetaData { fileType :: String } deriving Show
+
 type SnipsNvim a = Neovim SnipsEnv a
-data Snippet = Snippet { name :: String, content :: [String] } deriving Show
+data Snippet = Snippet { name :: String, content :: [String], meta :: SnippetMetaData } deriving Show
 
 type Quotes = (String, String)
 -- State

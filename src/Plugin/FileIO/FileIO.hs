@@ -1,15 +1,22 @@
-module Plugin.FileIO.FileIO (allSnippets, loadSnippet ) where
-import Plugin.Types  (Snippet(..))
+module Plugin.FileIO.FileIO (allSnippets, loadSnippet, snippetsOfType ) where
+import Plugin.Types  (Snippet(..), SnippetMetaData (..))
 
 
 sampleData :: [Snippet]
-sampleData = [Snippet "MySnippet" ["hello <#Title#>", "bye <#Title#>"], Snippet "Andris Snippet" ["bye <#Title#>"]]
+sampleData = [
+  Snippet "MySnippet" ["hello <#Title#>", "bye <#Title#>"] (SnippetMetaData {fileType = "haskell" }),
+  Snippet "Andris Snippet" ["bye <#Title#>"] (SnippetMetaData {fileType = "haskell" }),
+  Snippet "Bashibash Snippet" ["bye <#Title#>"] (SnippetMetaData {fileType = "bash" })
+  ]
 
-allSnippets :: [Snippet]
-allSnippets = sampleData
+allSnippets :: IO [Snippet]
+allSnippets = return sampleData
+
+snippetsOfType :: String -> IO [Snippet]
+snippetsOfType ft =
+  filter (\snippet -> (fileType . meta) snippet == ft) <$> allSnippets
+
 
 loadSnippet :: String -> IO Snippet
-loadSnippet n = do
-    let s = filter (\(Snippet name _) -> name == n ) allSnippets
-    pure $ head s
+loadSnippet n =  head . filter (\(Snippet name _ _) -> name == n ) <$> allSnippets
 

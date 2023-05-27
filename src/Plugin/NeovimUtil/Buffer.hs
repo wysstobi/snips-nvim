@@ -1,5 +1,5 @@
-module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer,
-getCurrentCursorPosition,closeBuffer) where
+module Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer, getBufferFileType,
+getCurrentCursorPosition,closeBuffer, setCurrentBuffersFileType) where
 
 import Neovim.API.String
 import Neovim.Classes (NvimObject(fromObjectUnsafe))
@@ -33,6 +33,11 @@ clearBuffer buffer = do
       buffer_del_line buffer (lineCount -1)
       clearBuffer' (lineCount -1)
 
+getBufferFileType :: Buffer -> SnipsNvim String
+getBufferFileType buffer = fromObjectUnsafe <$> buffer_get_option buffer "filetype"
+
+setCurrentBuffersFileType :: String -> SnipsNvim()
+setCurrentBuffersFileType fileType = vim_command $ "set filetype=" ++ fileType
 
 getCurrentCursorPosition :: SnipsNvim (Buffer, Int)
 getCurrentCursorPosition = do 
