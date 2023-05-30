@@ -84,10 +84,10 @@ loadSnippet name' = do
   return (if null filteredSnippets then Nothing else Just (head filteredSnippets))
 
 addNewSnippet :: SnippetList -> Snippet -> SnippetList
-addNewSnippet (SnippetList snippets) newSnippet =
-  if any (\s -> name s == name newSnippet) snippets
-    then SnippetList snippets
-    else SnippetList (newSnippet : snippets)
+addNewSnippet (SnippetList snippets') newSnippet =
+  if any (\s -> name s == name newSnippet) snippets'
+    then SnippetList snippets'
+    else SnippetList (newSnippet : snippets')
 
 updateSnippet :: Snippet -> IO ()
 updateSnippet snippet' = do
