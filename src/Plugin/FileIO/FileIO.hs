@@ -41,11 +41,11 @@ newtype SnippetList = SnippetList {snippets :: [Snippet]} deriving (Show)
 
 instance FromJSON SnippetList where
   parseJSON = withObject "SnippetList" $ \v -> do
-    snippets <- v .: "snippets"
-    return $ SnippetList snippets
+    snippets' <- v .: "snippets"
+    return $ SnippetList snippets'
 
 instance ToJSON SnippetList where
-  toJSON (SnippetList snippets) = object ["snippets" .= snippets]
+  toJSON (SnippetList snippets') = object ["snippets" .= snippets']
 
 writeSnippet :: Snippet -> IO ()
 writeSnippet snippet' = do
