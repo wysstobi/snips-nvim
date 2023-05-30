@@ -5,7 +5,7 @@ import Neovim
 -- Environment
 data SnipsEnv = SnipsEnv { names :: String, snippetPath :: String, qs :: Quotes }
 
-newtype SnippetMetaData = SnippetMetaData { fileType :: String } deriving Show
+newtype SnippetMetaData = SnippetMetaData { fileTypes :: [String] } deriving Show
 
 type SnipsNvim a = Neovim SnipsEnv a
 data Snippet = Snippet { name :: String, content :: [String], meta :: SnippetMetaData } deriving Show

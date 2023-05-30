@@ -1,39 +1,39 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Plugin.SnipsApi
-    ( snipsCreate, snipsSave, handleTelescopeSelection, snips) where
+module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips) where
 
-import Neovim
-    ( Alternative(empty),
-      liftIO,
-      CommandArguments(CommandArguments, range),
-      asks )
-import Neovim.API.String
-    ( buffer_get_lines,
-      buffer_insert,
-      buffer_line_count,
-      nvim_buf_line_count,
-      nvim_exec_lua,
-      vim_get_current_buffer,
-      Buffer)
+import qualified Control.Monad
+import Control.Monad.Trans.Class (MonadTrans (lift))
+import Control.Monad.Trans.State (StateT (runStateT), get, put)
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
-import Plugin.NeovimUtil.Buffer (createNewBuf, readAndPaste, clearBuffer, getCurrentCursorPosition, closeBuffer, getBufferFileType, setCurrentBuffersFileType)
+import Neovim
+  ( Alternative (empty),
+    CommandArguments (CommandArguments, range),
+    asks,
+    liftIO,
+  )
+import Neovim.API.String
+  ( Buffer,
+    buffer_get_lines,
+    buffer_insert,
+    buffer_line_count,
+    nvim_buf_line_count,
+    nvim_exec_lua,
+    vim_get_current_buffer,
+  )
+import Plugin.FileIO.FileIO (allSnippets, loadSnippet, snippetsOfType)
+import Plugin.NeovimUtil.Buffer (clearBuffer, closeBuffer, createNewBuf, getBufferFileType, getCurrentCursorPosition, readAndPaste, setCurrentBuffersFileType)
 import Plugin.NeovimUtil.Input (askForString)
-import Plugin.FileIO.FileIO (loadSnippet, allSnippets, snippetsOfType)
-import Plugin.Types  (Snippet(..), PlaceholderState(..), Placeholder (Placeholder, key), PlaceholderST, SnipsNvim, SnipsEnv (..), SnippetMetaData (..))
-import Plugin.Text.Text (extractPlaceholders, replaceInText)
-import Control.Monad.Trans.State (StateT(runStateT), get, put)
-import Control.Monad.Trans.Class ( MonadTrans(lift) )
-import qualified Control.Monad
 import Plugin.NeovimUtil.Util (writeToStatusLine)
-
+import Plugin.Text.Text (extractPlaceholders, replaceInText)
+import Plugin.Types (Placeholder (Placeholder, key), PlaceholderST, PlaceholderState (..), Snippet (..), SnippetMetaData (..), SnipsEnv (..), SnipsNvim)
 
 -- :lua print(vim.o.filetype) gets the currentfiletypefile
 
 -- | Opens a new buffer containing the currently selected text.
 snipsCreate :: CommandArguments -> SnipsNvim ()
-snipsCreate CommandArguments { range = _range }  =
+snipsCreate CommandArguments {range = _range} =
   case _range of
     (Just (l1, l2)) -> do
       cb <- vim_get_current_buffer
@@ -43,7 +43,6 @@ snipsCreate CommandArguments { range = _range }  =
       readAndPaste cb newBuffer l1 l2 0
       return ()
     Nothing -> return ()
-
 
 -- | Saves the current buffer as a new snippet.
 snipsSave :: CommandArguments -> SnipsNvim ()
@@ -88,14 +87,14 @@ replacePlaceholders snippet = do
 -- | Ask the user for replacements for the placeholders and store it in the state
 askForPlaceholderReplacements :: [Placeholder] -> PlaceholderST ()
 askForPlaceholderReplacements [] = pure ()
-askForPlaceholderReplacements (current:rest) = do
+askForPlaceholderReplacements (current : rest) = do
   PS (Snippet name content meta) qs rs <- get
-  let prompt = "Enter a text which replaces \""  ++ key current ++ "\":"
+  let prompt = "Enter a text which replaces \"" ++ key current ++ "\":"
   replacement <- lift $ askForString prompt Nothing
   put $ PS (Snippet name content meta) qs (rs ++ [Placeholder (key current) (Just replacement)])
   askForPlaceholderReplacements rest
 
--- | Opens a @Telescope@ finder to select a snippet to insert
+-- |  Opens a @Telescope@ finder to select a snippet to insert
 snips :: CommandArguments -> SnipsNvim ()
 snips _ = do
   -- create a table from all existing snippets
@@ -104,5 +103,5 @@ snips _ = do
   snippets <- liftIO $ snippetsOfType ft
   let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
 
-  let command = "return run({" ++ table ++"})"
+  let command = "return run({" ++ table ++ "})"
   Control.Monad.void (nvim_exec_lua command empty)
