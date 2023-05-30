@@ -63,12 +63,15 @@ handleTelescopeSelection _ snippetName = do
   (buffer, line) <- getCurrentCursorPosition
   quotes <- asks qs
   snippet <- liftIO $ loadSnippet snippetName
-  let state = PS snippet quotes []
-  snipBuffer <- fst <$> runStateT (replacePlaceholders snippet) state
-  setCurrentBuffersFileType ((fileType . meta) snippet)
-  linecount <- fromIntegral <$> nvim_buf_line_count snipBuffer
-  readAndPaste snipBuffer buffer 1 linecount line
-  closeBuffer snipBuffer
+  case snippet of
+    Nothing -> return ()
+    Just snippet' -> do
+      let state = PS snippet' quotes []
+      snipBuffer <- fst <$> runStateT (replacePlaceholders snippet') state
+      setCurrentBuffersFileType (intercalate "," (fileTypes (meta snippet')))
+      linecount <- fromIntegral <$> nvim_buf_line_count snipBuffer
+      readAndPaste snipBuffer buffer 1 linecount line
+      closeBuffer snipBuffer
 
 -- | Creates a new buffer and inserts the selected snippet to it
 replacePlaceholders :: Snippet -> PlaceholderST Buffer
