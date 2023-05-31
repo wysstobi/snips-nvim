@@ -22,7 +22,7 @@ import Neovim.API.String
     nvim_exec_lua,
     vim_get_current_buffer,
   )
-import Plugin.FileIO.FileIO (allSnippets, loadSnippet, snippetsOfType)
+import Plugin.FileIO.FileIO (loadSnippet, snippetsOfType)
 import Plugin.NeovimUtil.Buffer (clearBuffer, closeBuffer, createNewBuf, getBufferFileType, getCurrentCursorPosition, readAndPaste, setCurrentBuffersFileType)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.NeovimUtil.Util (writeToStatusLine)
