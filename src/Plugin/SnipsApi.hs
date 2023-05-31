@@ -22,7 +22,7 @@ import Neovim.API.String
     nvim_exec_lua,
     vim_get_current_buffer,
   )
-import Plugin.FileIO.FileIO (loadSnippet, snippetsOfType)
+import Plugin.FileIO.FileIO (loadSnippet, getAllSnippetsByFileType, writeSnippet)
 import Plugin.NeovimUtil.Buffer (clearBuffer, closeBuffer, createNewBuf, getBufferFileType, getCurrentCursorPosition, readAndPaste, setCurrentBuffersFileType)
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.NeovimUtil.Util (writeToStatusLine)
@@ -53,19 +53,25 @@ snipsSave _ = do
   fileType <- getBufferFileType cb
   bufferContent <- buffer_get_lines cb 0 lineCount True
   snippetName <- askForString "Enter a name for the snippet:" Nothing
-  writeToStatusLine fileType
-  liftIO $ writeFile (path ++ snippetName ++ ".json") (foldr (\cur acc -> cur ++ "\n" ++ acc) "" bufferContent)
-  closeBuffer cb
+  let newSnippet = createSnippet snippetName bufferContent fileType
+  writeResult <- liftIO $ writeSnippet path newSnippet
+  case writeResult of
+    Left errorMsg -> writeToStatusLine errorMsg
+    Right _ -> do 
+      writeToStatusLine $ "Created snippet " ++ snippetName ++ " successfully"
+      closeBuffer cb
+    where createSnippet snippetName content fileType = Snippet snippetName content (SnippetMetaData [fileType])
 
 -- | Handles the selection of a snippetname by telescope
 handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   (buffer, line) <- getCurrentCursorPosition
   quotes <- asks qs
-  snippet <- liftIO $ loadSnippet snippetName
+  filePath <- asks snippetPath
+  snippet <- liftIO $ loadSnippet filePath snippetName
   case snippet of
-    Nothing -> return ()
-    Just snippet' -> do
+    Left errorMsg -> writeToStatusLine errorMsg
+    Right snippet' -> do
       let state = PS snippet' quotes []
       snipBuffer <- fst <$> runStateT (replacePlaceholders snippet') state
       setCurrentBuffersFileType (intercalate "," (fileTypes (meta snippet')))
@@ -103,8 +109,11 @@ snips _ = do
   -- create a table from all existing snippets
   cb <- vim_get_current_buffer
   ft <- getBufferFileType cb
-  snippets <- liftIO $ snippetsOfType ft
-  let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
-
-  let command = "return run({" ++ table ++ "})"
-  Control.Monad.void (nvim_exec_lua command empty)
+  filePath <- asks snippetPath
+  eitherSnippets <- liftIO $ getAllSnippetsByFileType filePath ft
+  case eitherSnippets of 
+    Left errorMsg -> writeToStatusLine errorMsg
+    Right snippets -> do
+      let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
+      let command = "return run({" ++ table ++ "})"
+      Control.Monad.void (nvim_exec_lua command empty)
