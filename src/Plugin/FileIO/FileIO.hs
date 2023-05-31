@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Plugin.FileIO.FileIO (readExistingSnippets, loadSnippet, getAllSnippetsByFileType, writeSnippet) where
+module Plugin.FileIO.FileIO (readExistingSnippets2, readExistingSnippets, loadSnippet, getAllSnippetsByFileType, writeSnippet) where
 
 import Data.Aeson
   ( eitherDecode,
@@ -30,12 +30,11 @@ readExistingSnippets snippetsFilePath = do
   if exists then do
     -- Read existing snippets from file
     bytes <- B.readFile snippetsFilePath
-    case Data.Aeson.eitherDecode bytes of
-      Left err -> return (Left $ "Failed to decode JSON: " ++ err)
-      Right snippetList -> return snippetList
+    return $ case eitherDecode bytes of
+      Left err -> Left $ "Failed to decode JSON: " ++ err
+      Right snippetList -> Right snippetList
   else 
     return $ Left "The snippet file does not exist"
-
 
 -- | loads a single snippet by its name
 loadSnippet :: FilePath -> String -> IO (Either String Snippet)
