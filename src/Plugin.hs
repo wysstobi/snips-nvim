@@ -15,7 +15,7 @@ import Plugin.Types (SnipsEnv(..))
 plugin :: Neovim () NeovimPlugin
 plugin = do
     wrapPlugin Plugin
-        { environment = SnipsEnv { names = "Tobi, Andri, Raphi", snippetPath = "/Users/wysstobi/snippets/", qs = ("<#", "#>") },
+        { environment = SnipsEnv { names = "Tobi, Andri, Raphi", snippetPath = "mysnippets.json", qs = ("<#", "#>") },
           exports = [ 
             $(function' 'fprodTeam) Sync, 
             $(command'  'snipsCreate) [CmdRange WholeFile],

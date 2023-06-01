@@ -62,16 +62,18 @@ library
     exposed-modules: SnipsLib
                    , Plugin.Text.Text
                    , Plugin.Text.Parsers
+                   , Plugin.Types
  
 
     -- Modules included in this library but not exported.
     other-modules:       Plugin
-                       , Plugin.Types
+                       , Plugin.Examples
                        , Plugin.SnipsApi
                        , Plugin.FileIO.FileIO
                        , Plugin.NeovimUtil.Input
                        , Plugin.NeovimUtil.Util
                        , Plugin.NeovimUtil.Buffer
+                       , Plugin.FprodTeam
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
@@ -82,6 +84,10 @@ library
                      , mtl >= 2.2.2 && < 2.3.1
                      -- The dependencies below are only needed for the example plugin
                      , unliftio
+                     , aeson
+                     , bytestring
+                     , text
+                     , directory
 
     -- Directories containing source files.
   hs-source-dirs:   src
@@ -148,6 +154,6 @@ test-suite snips-test
     main-is:          SnipsTest.hs
 
     -- Test dependencies.
-    build-depends:
-        base >= 4.7 && < 5,
-        snips 
+    build-depends:  base >= 4.7 && < 5
+                  , snips 
+                  , containers
