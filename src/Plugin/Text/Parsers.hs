@@ -14,22 +14,6 @@ parseUntil text = parseUntil' text ("", "") where
     else 
       parseUntil' text (res ++ end ++ [c], "")
 
--- | Parses text until the given string appears
--- if the string was not found, the whole text will be parsed
---parseUntil :: String -> Parser String
---parseUntil text = parseUntil' text ("", "") where
---  parseUntil' "" (res, _) = return res
---  parseUntil' (t:ext) (res, end) = do
---    hasNextChar <- hasNext
---    if not hasNextChar then return res
---      else do
---        c <- item
---        if c == t then
---          parseUntil' ext (res,end ++ [c])
---        else
---          parseUntil' text (res ++ end ++ [c], "")
---
-
 -- | returns true if the string to parse has at least one character left
 hasNext :: Parser Bool
 hasNext = P (\inp -> case inp of
