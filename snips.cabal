@@ -62,11 +62,11 @@ library
     exposed-modules: SnipsLib
                    , Plugin.Text.Text
                    , Plugin.Text.Parsers
+                   , Plugin.Types
  
 
     -- Modules included in this library but not exported.
     other-modules:       Plugin
-                       , Plugin.Types
                        , Plugin.Examples
                        , Plugin.SnipsApi
                        , Plugin.FileIO.FileIO
@@ -154,6 +154,6 @@ test-suite snips-test
     main-is:          SnipsTest.hs
 
     -- Test dependencies.
-    build-depends:
-        base >= 4.7 && < 5,
-        snips 
+    build-depends:  base >= 4.7 && < 5
+                  , snips 
+                  , containers
