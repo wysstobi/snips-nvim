@@ -53,7 +53,7 @@ replaceInText = do
   replaceInText' content where
     replaceInText' [] = pure $ Just []
     replaceInText' (line:rest) = do
-      currentLine <- replaceInLine line
+      currentLine  <- replaceInLine line
       replacedRest <- replaceInText' rest
       pure $ (:) <$> currentLine <*> replacedRest
 

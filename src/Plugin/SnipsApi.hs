@@ -29,7 +29,6 @@ import Plugin.NeovimUtil.Util (writeToStatusLine)
 import Plugin.Text.Text (extractPlaceholders, replaceInText)
 import Plugin.Types (Placeholder (Placeholder, key), PlaceholderST, PlaceholderState (..), Snippet (..), SnippetMetaData (..), SnipsEnv (..), SnipsNvim)
 
--- :lua print(vim.o.filetype) gets the currentfiletypefile
 
 -- | Opens a new buffer containing the currently selected text.
 snipsCreate :: CommandArguments -> SnipsNvim ()

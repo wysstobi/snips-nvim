@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Plugin.FileIO.FileIO (readExistingSnippets2, readExistingSnippets, loadSnippet, getAllSnippetsByFileType, writeSnippet) where
+module Plugin.FileIO.FileIO (readExistingSnippets, loadSnippet, getAllSnippetsByFileType, writeSnippet) where
 
 import Data.Aeson
   ( eitherDecode,
