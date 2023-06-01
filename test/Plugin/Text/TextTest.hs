@@ -34,7 +34,7 @@ instance Arbitrary Snippet where
 instance Arbitrary SnippetMetaData where
   arbitrary = do
     fileType <- elements ["lua", "hs"]
-    pure $ SnippetMetaData fileType
+    pure $ SnippetMetaData [fileType]
 
 instance Arbitrary Placeholder where
   arbitrary = do
@@ -74,10 +74,10 @@ testSetFromList = testProperty "test create a set from a list" $
 
 
 testSnippet :: Snippet
-testSnippet = Snippet "test" ["test1", "test2"] (SnippetMetaData "hs")
+testSnippet = Snippet "test" ["test1", "test2"] (SnippetMetaData ["hs"])
 
 emptySnippet :: Snippet
-emptySnippet = Snippet "" [] (SnippetMetaData "")
+emptySnippet = Snippet "" [] (SnippetMetaData [""])
 
 testReplaceInLine :: TestTree
 testReplaceInLine = testProperty "test replace in a line" $

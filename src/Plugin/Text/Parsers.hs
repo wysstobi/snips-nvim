@@ -8,11 +8,13 @@ parseUntil text = parseUntil' text ("", "") where
   parseUntil' "" (res, _) = return res
   parseUntil' (t:ext) (res, end) = do
     c <- item
-    let result = res ++ [c]
     if c == t then 
       parseUntil' ext (res,end ++ [c])
     else 
-      parseUntil' text (res ++ end ++ [c], "")
+      if c == head text then
+        parseUntil' (tail text) (res ++ end, [c])
+      else 
+        parseUntil' text (res ++ end ++ [c], "")
 
 -- | returns true if the string to parse has at least one character left
 hasNext :: Parser Bool
