@@ -68,7 +68,9 @@ replaceInLine :: (MonadState PlaceholderState m) => String -> m (Maybe String)
 replaceInLine currentLine = do
   PS _ qs placeholders <- get
   let parsed = parse (many (replaceNext placeholders qs)) currentLine
-  pure (mconcat . fst <$> parsed)
+  let replaced = mconcat . fst <$> parsed
+  let rest = snd <$> parsed
+  return $ (++) <$> replaced <*> rest
 
 getReplacementForKey :: [Placeholder] -> String -> String
 getReplacementForKey [] _ = ""
