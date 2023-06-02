@@ -6,14 +6,17 @@ import Neovim
 import Data.Aeson.Types
 
 -- Environment
-data SnipsEnv = SnipsEnv { names :: String, snippetPath :: String, qs :: Quotes }
+data SnipsEnv = SnipsEnv { snippetPath :: String, qs :: Quotes }
+
+type SnipsNvim a = Neovim SnipsEnv a
+
+type Quotes = (String, String)
 
 newtype SnippetMetaData = SnippetMetaData { fileTypes :: [String] } deriving (Show, Eq)
 
-type SnipsNvim a = Neovim SnipsEnv a
 data Snippet = Snippet { name :: String, content :: [String], meta :: SnippetMetaData } deriving (Show, Eq)
 
-type Quotes = (String, String)
+
 -- State
 data Placeholder = Placeholder { key :: String, value :: Maybe String } deriving (Show, Eq)
 

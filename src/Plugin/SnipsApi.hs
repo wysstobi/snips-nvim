@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Defines all functions that will be exposed to neovim -}
 module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips) where
 
 import qualified Control.Monad
@@ -23,28 +24,46 @@ import Neovim.API.String
     vim_get_current_buffer,
   )
 import Plugin.FileIO.FileIO (loadSnippet, getAllSnippetsByFileType, writeSnippet)
-import Plugin.NeovimUtil.Buffer (clearBuffer, closeBuffer, createNewBuf, getBufferFileType, getCurrentCursorPosition, readAndPaste, setCurrentBuffersFileType)
+import Plugin.NeovimUtil.Buffer 
+  ( clearBuffer, 
+    closeBuffer, 
+    createNewBuf, 
+    getBufferFileType, 
+    getCurrentCursorPosition, 
+    readAndPaste, 
+    setCurrentBuffersFileType
+  )
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.NeovimUtil.Util (writeToStatusLine)
-import Plugin.Text.Text (extractPlaceholders, replaceInText)
-import Plugin.Types (Placeholder (Placeholder, key), PlaceholderST, PlaceholderState (..), Snippet (..), SnippetMetaData (..), SnipsEnv (..), SnipsNvim)
+import Plugin.Text.Searching (extractPlaceholders)
+import Plugin.Text.Replacing (replaceInText)
+import Plugin.Types 
+  ( Placeholder (Placeholder, key), 
+    PlaceholderST,
+    PlaceholderState (..),
+    Snippet (..),
+    SnippetMetaData (..),
+    SnipsEnv (..),
+    SnipsNvim
+  )
 
 
 -- | Opens a new buffer containing the currently selected text.
-snipsCreate :: CommandArguments -> SnipsNvim ()
+snipsCreate :: CommandArguments  -- ^ arguments passed from NeoVim, it is used to exract the selected line numbers
+            -> SnipsNvim ()
 snipsCreate CommandArguments {range = _range} =
   case _range of
     (Just (l1, l2)) -> do
       cb <- vim_get_current_buffer
       fileType <- getBufferFileType cb
-      newBuffer <- createNewBuf "Create new snippet" Nothing
-      setCurrentBuffersFileType fileType
+      newBuffer <- createNewBuf "Create new snippet" Nothing fileType
       readAndPaste cb newBuffer l1 l2 0
       return ()
     Nothing -> return ()
 
 -- | Saves the current buffer as a new snippet.
-snipsSave :: CommandArguments -> SnipsNvim ()
+snipsSave :: CommandArguments -- ^ this is always passed for exposed commands to NeoVim but not used here
+          -> SnipsNvim ()
 snipsSave _ = do
   cb <- vim_get_current_buffer
   path <- asks snippetPath
@@ -61,28 +80,33 @@ snipsSave _ = do
       closeBuffer cb
     where createSnippet snippetName content fileType = Snippet snippetName content (SnippetMetaData [fileType])
 
--- | Handles the selection of a snippetname by telescope
-handleTelescopeSelection :: CommandArguments -> String -> SnipsNvim ()
+-- | Handles the selection of a snippetname by telescope.
+-- This function asks the user to insert text to replace all @Placeholder@s and inserts the filled snippet into the currently opened buffer.
+handleTelescopeSelection :: CommandArguments  -- ^ this is always passed for exposed commands to NeoVim but not used here
+                         -> String -- ^ the selected name of the snippet to paste
+                         -> SnipsNvim ()
 handleTelescopeSelection _ snippetName = do
   (buffer, line) <- getCurrentCursorPosition
   quotes <- asks qs
   filePath <- asks snippetPath
+  fileType <- getBufferFileType buffer
   snippet <- liftIO $ loadSnippet filePath snippetName
   case snippet of
     Left errorMsg -> writeToStatusLine errorMsg
     Right snippet' -> do
       let state = PS snippet' quotes []
-      snipBuffer <- fst <$> runStateT (replacePlaceholders snippet') state
-      setCurrentBuffersFileType (intercalate "," (fileTypes (meta snippet')))
+      snipBuffer <- fst <$> runStateT (replacePlaceholders fileType snippet') state
       linecount <- fromIntegral <$> nvim_buf_line_count snipBuffer
       readAndPaste snipBuffer buffer 1 linecount line
       closeBuffer snipBuffer
 
 -- | Creates a new buffer and inserts the selected snippet to it
-replacePlaceholders :: Snippet -> PlaceholderST Buffer
-replacePlaceholders snippet = do
+replacePlaceholders :: String -- ^ the filetype for the new buffer
+                    -> Snippet -- ^ the snippet ot insert
+                    -> PlaceholderST Buffer -- ^ the buffer that will be used to replace teh @Placeholder@ values.
+replacePlaceholders fileType snippet = do
   placeholders <- extractPlaceholders
-  buffer <- lift $ createNewBuf ("Insert " <> name snippet) Nothing
+  buffer <- lift $ createNewBuf ("Insert " <> name snippet) Nothing fileType
   lift $ buffer_insert buffer 0 (content snippet)
   askForPlaceholderReplacements placeholders
   text <- replaceInText
@@ -102,7 +126,7 @@ askForPlaceholderReplacements (current : rest) = do
   put $ PS (Snippet name content meta) qs (rs ++ [Placeholder (key current) (Just replacement)])
   askForPlaceholderReplacements rest
 
--- |  Opens a @Telescope@ finder to select a snippet to insert
+-- | Opens a @Telescope@ finder to select a snippet to insert.
 snips :: CommandArguments -> SnipsNvim ()
 snips _ = do
   -- create a table from all existing snippets

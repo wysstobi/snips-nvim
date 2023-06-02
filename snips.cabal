@@ -60,7 +60,8 @@ library
 
     -- Modules exported by the library.
     exposed-modules: SnipsLib
-                   , Plugin.Text.Text
+                   , Plugin.Text.Searching
+                   , Plugin.Text.Replacing
                    , Plugin.Text.Parsers
                    , Plugin.Types
  
@@ -73,7 +74,6 @@ library
                        , Plugin.NeovimUtil.Input
                        , Plugin.NeovimUtil.Util
                        , Plugin.NeovimUtil.Buffer
-                       , Plugin.FprodTeam
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 

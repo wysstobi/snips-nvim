@@ -7,7 +7,6 @@ module Plugin
 
 import Neovim
 
-import Plugin.FprodTeam(fprodTeam)
 import Plugin.SnipsApi(snipsCreate, snipsSave, handleTelescopeSelection, snips)
 import Plugin.Types (SnipsEnv(..))
 
@@ -15,9 +14,8 @@ import Plugin.Types (SnipsEnv(..))
 plugin :: Neovim () NeovimPlugin
 plugin = do
     wrapPlugin Plugin
-        { environment = SnipsEnv { names = "Tobi, Andri, Raphi", snippetPath = "mysnippets.json", qs = ("<#", "#>") },
+        { environment = SnipsEnv { snippetPath = "mysnippets.json", qs = ("<#", "#>") },
           exports = [ 
-            $(function' 'fprodTeam) Sync, 
             $(command'  'snipsCreate) [CmdRange WholeFile],
             $(command'  'snipsSave) [CmdRange WholeFile],
             $(command'  'handleTelescopeSelection) [CmdSync Async], 

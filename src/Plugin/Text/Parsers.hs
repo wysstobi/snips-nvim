@@ -1,9 +1,12 @@
+{-| This modules provides parser to search and replace placeholders in strings. -}
 module Plugin.Text.Parsers where
 
 import Control.Applicative
-import Data.Char
 
-parseUntil :: String -> Parser String 
+-- | Parses the text until the given string has been detected
+-- The String will then be removed.
+parseUntil :: String -- ^ the text will be parsed until this string occurs.
+           -> Parser String 
 parseUntil text = parseUntil' text ("", "") where
   parseUntil' "" (res, _) = return res
   parseUntil' (t:ext) (res, end) = do
@@ -16,15 +19,16 @@ parseUntil text = parseUntil' text ("", "") where
       else 
         parseUntil' text (res ++ end ++ [c], "")
 
--- | returns true if the string to parse has at least one character left
-hasNext :: Parser Bool
-hasNext = P (\inp -> case inp of
-                      (c:cs) -> Just (True, c:cs)
-                      _    -> Just (False,[]))
- 
 
 -- following code has been copied from lecture
 
+-- | Parses any char
+item :: Parser Char
+item =  P (\inp -> case inp of
+                      (c:cs) -> Just (c, cs)
+                      _    -> Nothing)
+
+-- | Represents a parser
 newtype Parser a = P { parse :: String -> Maybe (a, String) }
 
 
@@ -60,38 +64,4 @@ instance Monad Parser where
   p >>= f = P (\inp -> case parse p inp of
     Nothing    -> Nothing
     Just (a, rest) -> parse (f a) rest)
-
-sat :: (Char -> Bool) -> Parser Char
-sat p = do
-  c <- item
-  if p c then pure c else empty
-
-
-item :: Parser Char
-item =  P (\inp -> case inp of
-                      (c:cs) -> Just (c, cs)
-                      _    -> Nothing)
-
-string :: String -> Parser String
-string []     = pure []
-string (c:cs) = pure (:) <*> char c <*> string cs
-
-digit :: Parser Char
-digit = sat isDigit
-
-alphaNum :: Parser Char
-alphaNum = sat isAlphaNum
-
-char :: Char -> Parser Char
-char c = sat (==c)
-
-
-space :: Parser ()
-space = fmap (\_ -> ()) (many (sat isSpace))
-
-token :: Parser a -> Parser a
-token p = space *> p <* space
-
-symbol :: String -> Parser String
-symbol ss = token (string ss)
 
