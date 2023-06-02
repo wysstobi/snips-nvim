@@ -4,6 +4,8 @@
 module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips) where
 
 import qualified Control.Monad
+
+import qualified Data.ByteString.Lazy as B
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.State (StateT (runStateT), get, put)
 import Data.List (intercalate)
@@ -23,22 +25,21 @@ import Neovim.API.String
     nvim_exec_lua,
     vim_get_current_buffer,
   )
-import Plugin.FileIO.FileIO (loadSnippet, getAllSnippetsByFileType, writeSnippet)
-import Plugin.NeovimUtil.Buffer 
-  ( clearBuffer, 
-    closeBuffer, 
-    createNewBuf, 
-    getBufferFileType, 
-    getCurrentCursorPosition, 
-    readAndPaste, 
-    setCurrentBuffersFileType
+import Plugin.FileIO.FileIO (loadSnippet, getAllSnippetsByFileType, writeSnippet, readFileAndTransform)
+import Plugin.NeovimUtil.Buffer
+  ( clearBuffer,
+    closeBuffer,
+    createNewBuf,
+    getBufferFileType,
+    getCurrentCursorPosition,
+    readAndPaste
   )
 import Plugin.NeovimUtil.Input (askForString)
 import Plugin.NeovimUtil.Util (writeToStatusLine)
 import Plugin.Text.Searching (extractPlaceholders)
 import Plugin.Text.Replacing (replaceInText)
-import Plugin.Types 
-  ( Placeholder (Placeholder, key), 
+import Plugin.Types
+  ( Placeholder (Placeholder, key),
     PlaceholderST,
     PlaceholderState (..),
     Snippet (..),
@@ -46,6 +47,8 @@ import Plugin.Types
     SnipsEnv (..),
     SnipsNvim
   )
+import Data.ByteString.Lazy.Char8 (unpack)
+import Control.Monad (guard)
 
 
 -- | Opens a new buffer containing the currently selected text.
@@ -75,7 +78,7 @@ snipsSave _ = do
   writeResult <- liftIO $ writeSnippet path newSnippet
   case writeResult of
     Left errorMsg -> writeToStatusLine errorMsg
-    Right _ -> do 
+    Right _ -> do
       writeToStatusLine $ "Created snippet " ++ snippetName ++ " successfully"
       closeBuffer cb
     where createSnippet snippetName content fileType = Snippet snippetName content (SnippetMetaData [fileType])
@@ -134,9 +137,14 @@ snips _ = do
   ft <- getBufferFileType cb
   filePath <- asks snippetPath
   eitherSnippets <- liftIO $ getAllSnippetsByFileType filePath ft
-  case eitherSnippets of 
+  luaScript <- liftIO $ readFileAndTransform "lua/telescope-integration.lua" (Right . unpack)
+  case eitherSnippets of
     Left errorMsg -> writeToStatusLine errorMsg
-    Right snippets -> do
-      let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
-      let command = "return run({" ++ table ++ "})"
-      Control.Monad.void (nvim_exec_lua command empty)
+    Right snippets -> 
+      case luaScript of
+        Left errorMsg -> writeToStatusLine errorMsg
+        Right script ->  do
+          let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
+          let command = "return run({" ++ table ++ "})"
+          Control.Monad.void (nvim_exec_lua script empty)
+          Control.Monad.void (nvim_exec_lua command empty)
