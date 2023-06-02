@@ -5,7 +5,6 @@ module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips)
 
 import qualified Control.Monad
 
-import qualified Data.ByteString.Lazy as B
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.State (StateT (runStateT), get, put)
 import Data.List (intercalate)
@@ -48,7 +47,6 @@ import Plugin.Types
     SnipsNvim
   )
 import Data.ByteString.Lazy.Char8 (unpack)
-import Control.Monad (guard)
 
 
 -- | Opens a new buffer containing the currently selected text.
