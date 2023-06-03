@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Plugin.Text.Replacing (replaceInText) where
+module Plugin.Text.Replacing where
 
 import Plugin.Types (Snippet(Snippet), Quotes, PlaceholderState(..), Placeholder(..) )
 import Control.Applicative

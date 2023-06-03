@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Plugin.Text.Searching (extractPlaceholders) where
+module Plugin.Text.Searching where
 
 import Plugin.Types (Snippet(Snippet), Quotes, PlaceholderState(..), Placeholder(..) )
 import Control.Applicative
