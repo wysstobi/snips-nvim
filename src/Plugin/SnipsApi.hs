@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 {- | Defines all functions that will be exposed to neovim -}
 module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips) where
 
 import qualified Control.Monad
+
 
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.State (StateT (runStateT), get, put)
@@ -138,11 +140,16 @@ snips _ = do
   luaScript <- liftIO $ readFileAndTransform "lua/telescope-integration.lua" (Right . unpack)
   case eitherSnippets of
     Left errorMsg -> writeToStatusLine errorMsg
-    Right snippets -> 
+    Right snippets ->
       case luaScript of
         Left errorMsg -> writeToStatusLine errorMsg
         Right script ->  do
-          let table = (intercalate "," . map ((\str -> "'" ++ str ++ "'") . name)) snippets
+          let table = intercalate "," (map(\snippet -> name snippet
+                     ++ "="
+                     ++ "{\""
+                     ++ intercalate "\",\"" (map (map (\c -> if c == '\\'  || c == '\"' then ' ' else c)) (content snippet))
+                     ++ "\"}")
+                 snippets)
           let command = "return run({" ++ table ++ "})"
           Control.Monad.void (nvim_exec_lua script empty)
           Control.Monad.void (nvim_exec_lua command empty)
