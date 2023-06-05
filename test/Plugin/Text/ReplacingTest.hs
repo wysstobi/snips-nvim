@@ -6,7 +6,7 @@ module Plugin.Text.ReplacingTest where
 import Data.List
 import Test.Tasty
 import Test.Tasty.HUnit
-import Plugin.Types (Placeholder (..), Quotes, PlaceholderST, PlaceholderState (..), Snippet (..), SnippetMetaData (SnippetMetaData))
+import Plugin.Types (Placeholder (..), Quotes, PlaceholderState (..), Snippet (..), SnippetMetaData (SnippetMetaData))
 import Plugin.Text.Parsers ( parse)
 import Control.Monad.State (evalState)
 import Plugin.Text.Replacing (replaceInText, replaceNext, getReplacementForKey, replaceInLine)
@@ -60,26 +60,21 @@ placeholderSchool = Placeholder "school" (Just "fhnw")
 addQuoteToString :: String -> String
 addQuoteToString s = fst quote ++ s ++ snd quote
 
--- TODO remove duplication
 createSnippetFromPlaceholderKey :: Placeholder -> Snippet
 createSnippetFromPlaceholderKey (Placeholder k _) =
-  Snippet "name" [
-    "The first line of a Snippet with key" ++ addQuoteToString k,
-    addQuoteToString k ++ "is a key at the beginning of a line",
-    "In the middle is the key" ++ addQuoteToString k ++ " in the last line"
-  ] (SnippetMetaData ["hs"])
+  Snippet "name" (replaceInTestText (addQuoteToString k)) (SnippetMetaData ["hs"])
 
 createSnippetTextFromPlaceholderValue :: Placeholder -> [String]
-createSnippetTextFromPlaceholderValue (Placeholder _ Nothing) = [
-    "The first line of a Snippet with key",
-    "is a key at the beginning of a line",
-    "In the middle is the key in the last line"
+createSnippetTextFromPlaceholderValue (Placeholder _ Nothing) = replaceInTestText ""
+createSnippetTextFromPlaceholderValue (Placeholder _ (Just v)) = replaceInTestText v
+
+replaceInTestText :: String -> [String]
+replaceInTestText value = [
+    "The first line of a Snippet with key" ++ value,
+    value ++ "is a key at the beginning of a line",
+    "In the last line, the key" ++ value ++ "is in the middle of the text"
   ]
-createSnippetTextFromPlaceholderValue (Placeholder _ (Just v)) = [
-    "The first line of a Snippet with key" ++ v,
-    v ++ "is a key at the beginning of a line",
-    "In the middle is the key" ++ v ++ " in the last line"
-  ]
+
 -- replaceInText
 testReplaceInText :: TestTree
 testReplaceInText = testProperty "test replace in text" $
