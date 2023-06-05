@@ -1,5 +1,6 @@
 # Snippet Plugin for Neovim
 
+[[ TOC ]]
 
 ## About the Project
 This project is part of the module "fprod" at the FHNW in Burgg/Windisch.
@@ -85,13 +86,13 @@ vim.keymap.set("n", "<F5>",
 ```
 
 ## Testing
-Running all tests.
+To run all tests, follow the steps below.
 
-Start the repl:
+Start cabal using `cabal repl`:
 ```sh
 cabal v2-repl tests
 ```
-Execute all tests:
+Execute the `main` function:
 ```sh
 ghci> main
 ```
