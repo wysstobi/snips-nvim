@@ -1,4 +1,3 @@
-
 local pickers      = require "telescope.pickers"
 local finders      = require "telescope.finders"
 local conf         = require("telescope.config").values
@@ -26,6 +25,7 @@ local marker = function(entry)
   }
 end
 
+-- extract all key from a given table
 local function getKeysFromTable(snippetTable)
   local keyTable = {}
   for key, _ in pairs(snippetTable) do
@@ -35,6 +35,7 @@ local function getKeysFromTable(snippetTable)
   return keyTable
 end
 
+-- defines how to open telescope
 function Run(table)
   local keys = getKeysFromTable(table)
   local opts = {
@@ -48,10 +49,12 @@ function Run(table)
     previewer = previewers.new_buffer_previewer{
       title = "Snippet Preview",
       define_preview = function (self, entry, _)
-        vim.api.nvim_buf_set_option(self.state.bufnr, 'filetype', table[entry[1]]["filetype"][1])
+        local filetype = table[entry[1]]["filetype"][1] or ""
+        vim.api.nvim_buf_set_option(self.state.bufnr, 'filetype', filetype)
         vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, table[entry[1]]["content"])
       end
     }}
     local names = pickers.new(opts)
+    -- open telescope dialog
     names:find()
   end
