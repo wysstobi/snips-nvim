@@ -48,7 +48,6 @@ meta : {
   ]
 }
 @
-
 -}
 instance ToJSON SnippetMetaData where
   toJSON (SnippetMetaData fileTypes) = object ["fileTypes" .= fileTypes]
