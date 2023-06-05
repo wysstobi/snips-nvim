@@ -30,19 +30,19 @@ replacingTests = testGroup "Text Replacing" [
 
 instance Arbitrary Snippet where
   arbitrary = do
-    name <- listOf $ elements ['a' .. 'z']
-    content <- listOf $ listOf $ elements ['a' .. 'z']
-    Snippet name content <$> arbitrary
+    n <- listOf $ elements ['a' .. 'z']
+    c <- listOf $ listOf $ elements ['a' .. 'z']
+    Snippet n c <$> arbitrary
 
 instance Arbitrary SnippetMetaData where
   arbitrary = do
-    fileType <- elements ["lua", "hs"]
-    pure $ SnippetMetaData [fileType]
+    ft <- elements ["lua", "hs"]
+    pure $ SnippetMetaData [ft]
 
 instance Arbitrary Placeholder where
   arbitrary = do
-    key <- listOf $ elements ['a' .. 'z']
-    Placeholder key <$> arbitrary
+    k <- listOf $ elements ['a' .. 'z']
+    Placeholder k <$> arbitrary
 
 -- TODO: read from config
 quote :: Quotes
@@ -69,10 +69,10 @@ createSnippetTextFromPlaceholderValue (Placeholder _ Nothing) = replaceInTestTex
 createSnippetTextFromPlaceholderValue (Placeholder _ (Just v)) = replaceInTestText v
 
 replaceInTestText :: String -> [String]
-replaceInTestText value = [
-    "The first line of a Snippet with key" ++ value,
-    value ++ "is a key at the beginning of a line",
-    "In the last line, the key" ++ value ++ "is in the middle of the text"
+replaceInTestText word = [
+    "The first line of a Snippet with key" ++ word,
+    word ++ "is a key at the beginning of a line",
+    "In the last line, the key" ++ word ++ "is in the middle of the text"
   ]
 
 -- replaceInText
