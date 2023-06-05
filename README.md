@@ -84,7 +84,19 @@ vim.keymap.set("n", "<F5>",
 )
 ```
 
-### Links
+## Testing
+Running all tests.
+
+Start the repl:
+```sh
+cabal v2-repl tests
+```
+Execute all tests:
+```sh
+ghci> main
+```
+
+## Links
 * [docs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4)
 * [List of functions that are provided by nvim-hs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4/docs/Neovim-API-Text.html#v:vim_command_output)
 
