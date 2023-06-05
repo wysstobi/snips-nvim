@@ -26,9 +26,13 @@ searchingTests = testGroup "Text Searching" [
   testSnippetExtractPlaceholders
   ]
 
--- TODO shuffle these two collections
-generateSnippetText :: [String] -> [Placeholder] -> [String]
-generateSnippetText ss phs = ss ++ fmap (addQuoteToString . key) phs
+generateSnippetText :: String -> String -> Placeholder -> Placeholder -> Placeholder -> [String]
+generateSnippetText s1 s2 ph1 ph2 ph3 = [
+      s1 ++ addQuoteToString(key ph1) ++ s2,
+      addQuoteToString(key ph2) ++ s1 ++ s2,
+      s1 ++ s2 ++ addQuoteToString(key ph3), 
+      s1 ++ s2 ++ addQuoteToString(key ph1)
+  ]
 
 -- extractPlaceholders
 testEmptySnippetExtractPlaceholders :: TestTree
@@ -40,14 +44,17 @@ testEmptySnippetExtractPlaceholders = testProperty "test extract placeholders fr
 
 testSnippetExtractPlaceholders :: TestTree
 testSnippetExtractPlaceholders = testProperty "test multiple extract placeholders from snippet" $
-  \(s, phs) ->
-  Data.List.foldr (&&) True (fmap ((/= "") . key) (phs::[Placeholder])) ==>
-  Data.List.foldr (&&) True (fmap (\el -> not $ fst quote `isInfixOf` key el) phs) ==>
-  Data.List.foldr (&&) True (fmap (\el -> not $ snd quote `isInfixOf` key el) phs) ==>
-  Data.List.foldr (&&) True (fmap (\el -> not $ snd quote `isInfixOf` el) (s :: [String])) ==>
-        sort (evalState extractPlaceholders (PS (
-         Snippet "name" (generateSnippetText (s :: [String]) (phs :: [Placeholder])) (SnippetMetaData ["hs"])
-          ) quote phs)) == sort (toList (fromList (fmap (\p -> Placeholder (key p) Nothing) phs)))
+  \s1 s2 ph1 ph2 ph3->
+  Data.List.foldr (&&) True (fmap ((/= "") . key) [ph1, ph2, ph3]) ==>
+  Data.List.foldr (&&) True (fmap (\el -> not $ fst quote `isInfixOf` key el) [ph1, ph2, ph3]) ==>
+  Data.List.foldr (&&) True (fmap (\el -> not $ snd quote `isInfixOf` key el) [ph1, ph2, ph3]) ==>
+  Data.List.foldr (&&) True (fmap (\el -> not $ snd quote `isInfixOf` el) [(s1 :: String), (s2 :: String)]) ==>
+  Data.List.foldr (&&) True (fmap (\el -> not $ fst quote `isInfixOf` el) [s1, s2]) ==>
+    sort (evalState extractPlaceholders (
+      PS (
+       Snippet "name" (generateSnippetText s1 s2 ph1 ph2 ph3) (SnippetMetaData ["hs"])
+          ) quote [ph1, ph2, ph3])) 
+      ==  sort (toList $ fromList (fmap (\ph -> Placeholder (key ph) Nothing) [ph1, ph2, ph3]))
 
 -- placeholdersInLine
 testPlaceholdersInEmptyLine :: TestTree
