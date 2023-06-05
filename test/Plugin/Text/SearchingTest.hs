@@ -6,18 +6,13 @@
 module Plugin.Text.SearchingTest where
 import Data.List
 import Test.Tasty
-import Test.Tasty.HUnit
 import Data.Set
 import Test.Tasty.QuickCheck
-import Plugin.Types (Placeholder (..), Quotes, PlaceholderST, PlaceholderState (..), Snippet (..), SnippetMetaData (SnippetMetaData))
+import Plugin.Types (Placeholder (..), PlaceholderState (..), Snippet (..), SnippetMetaData (SnippetMetaData))
 import Plugin.Text.Parsers ( parse)
-import Control.Monad.RWS (MonadState , MonadTrans (lift), when)
-import Control.Monad.Trans.State (StateT(runStateT), get, put, runState)
 import Plugin.Text.Searching
 import Control.Monad.State (evalState)
-import Control.Monad.Trans.Accum (add)
 import Plugin.Text.ReplacingTest (addQuoteToString, quote)
-import Plugin.Examples (mySnippet, placeholdersInSnippet)
 
 searchingTests :: TestTree
 searchingTests = testGroup "Text Searching" [
@@ -102,4 +97,3 @@ testPlaceholderSetFromStrings = testProperty "test placeholdersFromStrings" $
 testSetFromList :: TestTree
 testSetFromList = testProperty "test create a set from a list" $
   \xs -> Plugin.Text.Searching.setFromList (xs :: [Int]) == toList (fromList xs)
-
