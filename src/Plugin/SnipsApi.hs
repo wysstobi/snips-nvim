@@ -14,7 +14,7 @@ import Neovim
   ( Alternative (empty),
     CommandArguments (CommandArguments, range),
     asks,
-    liftIO, wait,
+    liftIO,
   )
 import Neovim.API.String
   ( Buffer,
@@ -49,11 +49,6 @@ import Plugin.Types
   )
 import Data.ByteString.Lazy.Char8 (unpack)
 
--- | Delimiter used to pass multiline - strings as arguments to lua functions
-startDelimiter :: String
-startDelimiter = "[===========["
-endDelimiter :: String
-endDelimiter   = "]===========]"
 
 -- | Opens a new buffer containing the currently selected text.
 snipsCreate :: CommandArguments  -- ^ arguments passed from NeoVim, it is used to exract the selected line numbers
@@ -152,6 +147,12 @@ snips _ = do
           let command = "return Run({" ++ table ++ "})"
           Control.Monad.void (nvim_exec_lua script empty)
           Control.Monad.void (nvim_exec_lua command empty)
+
+-- | Delimiter used to pass multiline-strings as arguments to lua functions
+startDelimiter :: String
+startDelimiter = "[===========["
+endDelimiter :: String
+endDelimiter   = "]===========]"
 
 -- | Generates a lua language conform table from the given snippets
 -- | Example table could look as follows:
