@@ -29,14 +29,14 @@ data PlaceholderState = PS { snippet :: Snippet, quotes :: Quotes, placeholders 
 type PlaceholderST a = StateT PlaceholderState (Neovim SnipsEnv) a
 
 
--- | Aeson instance for snippet metadata
+-- | 'Aeson' instance for snippet metadata
 -- Used to create a JSON object from snippet metadata
 instance FromJSON SnippetMetaData where
   parseJSON = withObject "SnippetMetaData" $ \v -> do
     fileTypes <- v .: "fileTypes"
     return $ SnippetMetaData fileTypes
 
-{- | Aeson instance for SnippetMetaData
+{- | 'Aeson' instance for SnippetMetaData
 Used to create a JSON object from SnippetMetaData
 
 __Example:__
@@ -53,6 +53,8 @@ meta : {
 instance ToJSON SnippetMetaData where
   toJSON (SnippetMetaData fileTypes) = object ["fileTypes" .= fileTypes]
 
+-- | 'Aeson' instance for Snippet
+-- Used to create a snippet from a JSON object
 instance FromJSON Snippet where
   parseJSON = withObject "Snippet" $ \v -> do
     name <- v .: "name"
@@ -61,7 +63,7 @@ instance FromJSON Snippet where
     return $ Snippet name content meta
 
 
-{- | Aeson instance for Snippet
+{- | 'Aeson' instance for Snippet
 Used to create a JSON object from a snippet
 
 __Example:__
@@ -70,6 +72,7 @@ __Example:__
 {
   "name": "Best Snippet Ever",
   "content": [
+    "main :: IO ()",
     "main = putStrLn \"Hello, World!\"\n"
   ],
   "meta": {...}
@@ -82,7 +85,7 @@ instance ToJSON Snippet where
 -- | Type used to represent a list of snippets
 newtype SnippetList = SnippetList {snippets :: [Snippet]} deriving (Show)
 
--- | Aeson instance for SnippetList
+-- | 'Aeson' instance for SnippetList
 -- Used to create a list of snippets from a JSON object
 instance FromJSON SnippetList where
   -- | Parse a JSON object into a SnippetList
@@ -92,7 +95,7 @@ instance FromJSON SnippetList where
     -- | Return a SnippetList
     return $ SnippetList snippets'
 
--- | Aeson instance for SnippetList
+-- | 'Aeson' instance for SnippetList
 -- Used to create a JSON object from a list of snippets
 instance ToJSON SnippetList where
   -- | Create a JSON object from a SnippetList
