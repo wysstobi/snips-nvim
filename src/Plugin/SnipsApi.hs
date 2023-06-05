@@ -49,6 +49,7 @@ import Plugin.Types
     SnipsNvim
   )
 import Data.ByteString.Lazy.Char8 (unpack)
+import Data.Char (isAlphaNum)
 
 
 -- | Opens a new buffer containing the currently selected text.
@@ -74,13 +75,17 @@ snipsSave _ = do
   fileType <- getBufferFileType cb
   bufferContent <- buffer_get_lines cb 0 lineCount True
   snippetName <- askForString "Enter a name for the snippet:" Nothing
-  let newSnippet = createSnippet snippetName bufferContent fileType
-  writeResult <- liftIO $ writeSnippet path newSnippet
-  case writeResult of
-    Left errorMsg -> writeToStatusLine errorMsg
-    Right _ -> do
-      writeToStatusLine $ "Created snippet " ++ snippetName ++ " successfully"
-      closeBuffer cb
+  let nameIsValid = foldr (\cur acc -> acc && isAlphaNum cur) True snippetName 
+  if nameIsValid then do
+    let newSnippet = createSnippet snippetName bufferContent fileType
+    writeResult <- liftIO $ writeSnippet path newSnippet
+    case writeResult of
+      Left errorMsg -> writeToStatusLine errorMsg
+      Right _ -> do
+        writeToStatusLine $ "Created snippet " ++ snippetName ++ " successfully"
+        closeBuffer cb
+  else 
+    writeToStatusLine "your entered snippet name must only contain alphanum letters, please save it again"
     where createSnippet snippetName content fileType = Snippet snippetName content (SnippetMetaData [fileType])
 
 -- | Handles the selection of a snippetname by telescope.
