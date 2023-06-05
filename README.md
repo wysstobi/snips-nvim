@@ -1,6 +1,6 @@
 # Snippet Plugin for Neovim
 
-[[ TOC ]]
+[[_TOC_]]
 
 ## About the Project
 This project is part of the module "fprod" at the FHNW in Burgg/Windisch.
@@ -10,6 +10,7 @@ For this purpose, a simple snippet management is provided,
 which offers the possibility to select among the available snippets using [Telescope](https://github.com/nvim-telescope/telescope.nvim)
 The snippets are persisted in an external file.
 
+![screenshot](./screenshot.png)
 
 ## Getting started
 
@@ -88,7 +89,7 @@ vim.keymap.set("n", "<F5>",
 ## Testing
 To run all tests, follow the steps below.
 
-Start cabal using `cabal repl`:
+Start cabal in the test folder:
 ```sh
 cabal v2-repl tests
 ```
