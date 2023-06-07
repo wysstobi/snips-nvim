@@ -66,6 +66,7 @@ snippetTransformer bytes = case eitherDecode bytes of
       Right snippetList -> Right snippetList
 
 -- Following functions are not used yet, but might be of interest in further development of the plugin.
+
 deleteSnippetByName :: FilePath -> String -> IO (Either String ())
 deleteSnippetByName snippetsPath name' = do
   -- Read existing snippets from file or create an empty list

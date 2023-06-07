@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 {- | Defines all functions that will be exposed to neovim -}
 module Plugin.SnipsApi (snipsCreate, snipsSave, handleTelescopeSelection, snips) where
@@ -149,12 +148,32 @@ snips _ = do
       case luaScript of
         Left errorMsg -> writeToStatusLine errorMsg
         Right script ->  do
-          let table = intercalate "," (map(\snippet -> name snippet
-                     ++ "="
-                     ++ "{\""
-                     ++ intercalate "\",\"" (map (map (\c -> if c == '\\'  || c == '\"' then ' ' else c)) (content snippet))
-                     ++ "\"}")
-                 snippets)
-          let command = "return run({" ++ table ++ "})"
+          let table = createLuaTableFromSnippets snippets 
+          let command = "return Run({" ++ table ++ "})"
           Control.Monad.void (nvim_exec_lua script empty)
           Control.Monad.void (nvim_exec_lua command empty)
+
+-- | Delimiter used to pass multiline-strings as arguments to lua functions
+startDelimiter :: String
+startDelimiter = "[===========["
+endDelimiter :: String
+endDelimiter   = "]===========]"
+
+-- | Generates a lua language conform table from the given snippets
+-- | Example table could look as follows:
+-- | table = { name = "snippetName", content = {"line1", "line2"}, filetype = {"haskell","hs"} }
+createLuaTableFromSnippets :: [Snippet] -> String
+createLuaTableFromSnippets snippets = 
+  intercalate "," (
+      map(\snippet -> name snippet 
+        ++ "="
+        ++ "{content={"
+        ++ startDelimiter
+        ++ intercalate (endDelimiter ++ "," ++ startDelimiter) (content snippet)
+        ++ endDelimiter
+        ++ "}, filetype={"
+        ++ startDelimiter
+        ++ intercalate (endDelimiter ++ "," ++ startDelimiter) (fileTypes (meta snippet))
+        ++ endDelimiter
+        ++ "}}")
+  snippets)
