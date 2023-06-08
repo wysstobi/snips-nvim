@@ -43,6 +43,7 @@ vim.cmd( [[
 1. Open a file in Neovim and select the code lines you want to save as snippet.
 2. Switch to Neovims command mode by typing `:` and type `SnipsCreate` just after `:'<,'>`.
 3. In the newly opened buffer, replace words that you want to use as placeholders by a string that is quoted by `<#` / `#>`
+
     _Note:_ if you use the same quoted string multiple times, snips-nvim will use the same text replacements when you use the snippet.
 4. Switch to Neovims command mode by typing `:` and type `SnipsSave` just after `:`.
 5. Enter a name for the new snippet
@@ -59,7 +60,8 @@ If you created a snippet, you can retrieve it at any time.
 
 The snippet is now pasted to your previous opened buffer.
 
-_Note_: snips-nvim stores and retrieves snippets per filetype. Therefore telescope only shows you the snippets matching the filetype of your currently opened buffer. You can set the filetype of a file manually using `:set filetype=haskell`
+_Note_: snips-nvim stores and retrieves snippets per filetype. Therefore telescope only shows you the snippets matching the filetype of your currently opened buffer. 
+You can set the filetype of a file manually using `:set filetype=haskell`
 
 ## Acknowledgments
 * [Haskell plugin API for neovim](https://hackage.haskell.org/package/nvim-hs)
