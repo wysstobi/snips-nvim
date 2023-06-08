@@ -70,6 +70,7 @@ library
     other-modules:       Plugin
                        , Plugin.Examples
                        , Plugin.SnipsApi
+                       , Plugin.Version
                        , Plugin.FileIO.FileIO
                        , Plugin.NeovimUtil.Input
                        , Plugin.NeovimUtil.Util

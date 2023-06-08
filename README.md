@@ -37,7 +37,7 @@ vim.cmd( [[
 ]])
 ```
 3. Run `stack build` in your repository's folder
-4. Test the installation: run `:echo SnipsNvim()`, this should print a message to the status line.
+4. Test the installation: run `:echo SnipsVersion()`, this should print a message to the status line.
 
 ### Creating a snippet
 1. Open a file in Neovim and select the code lines you want to save as snippet.

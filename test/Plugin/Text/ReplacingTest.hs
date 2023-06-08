@@ -44,7 +44,6 @@ instance Arbitrary Placeholder where
     k <- listOf $ elements ['a' .. 'z']
     Placeholder k <$> arbitrary
 
--- TODO: read from config
 quote :: Quotes
 quote = ("<#","#>")
 

@@ -153,15 +153,10 @@ snips _ = do
           Control.Monad.void (nvim_exec_lua script empty)
           Control.Monad.void (nvim_exec_lua command empty)
 
--- | Delimiter used to pass multiline-strings as arguments to lua functions
-startDelimiter :: String
-startDelimiter = "[===========["
-endDelimiter :: String
-endDelimiter   = "]===========]"
 
 -- | Generates a lua language conform table from the given snippets
 -- | Example table could look as follows:
--- | table = { name = "snippetName", content = {"line1", "line2"}, filetype = {"haskell","hs"} }
+-- | @table = { name = "snippetName", content = {"line1", "line2"}, filetype = {"haskell","hs"} }@
 createLuaTableFromSnippets :: [Snippet] -> String
 createLuaTableFromSnippets snippets = 
   intercalate "," (
@@ -177,3 +172,7 @@ createLuaTableFromSnippets snippets =
         ++ endDelimiter
         ++ "}}")
   snippets)
+    where
+      -- | Delimiter used to pass multiline-strings as arguments to lua functions
+      startDelimiter = "[===========["
+      endDelimiter   = "]===========]"
