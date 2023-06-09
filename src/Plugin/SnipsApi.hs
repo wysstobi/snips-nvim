@@ -57,9 +57,10 @@ snipsCreate :: CommandArguments  -- ^ arguments passed from NeoVim, it is used t
 snipsCreate CommandArguments {range = _range} =
   case _range of
     (Just (l1, l2)) -> do
+      (opening, closing) <- asks qs
       cb <- vim_get_current_buffer
       fileType <- getBufferFileType cb
-      newBuffer <- createNewBuf "Create new snippet" Nothing fileType
+      newBuffer <- createNewBuf ("Create a new snippet, wrap a word in "++ opening ++ " and " ++ closing ++ " to define a placeholder!") Nothing fileType
       readAndPaste cb newBuffer l1 l2 0
       return ()
     Nothing -> return ()
