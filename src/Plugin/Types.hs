@@ -20,11 +20,7 @@ data Snippet = Snippet { name :: String, content :: [String], meta :: SnippetMet
 -- State
 data Placeholder = Placeholder { key :: String, value :: Maybe String } deriving (Show, Eq, Ord)
 
--- instance Eq Placeholder where
---   (Placeholder k v) == (Placeholder k2 v2) = k == k2 && v == v2
-
 data PlaceholderState = PS { snippet :: Snippet, quotes :: Quotes, placeholders :: [Placeholder] } deriving (Show, Eq)
-
 
 type PlaceholderST a = StateT PlaceholderState (Neovim SnipsEnv) a
 
