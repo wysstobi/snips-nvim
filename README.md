@@ -102,6 +102,9 @@ ghci> main
 ## Links
 * [Nvim-hs API documentation](https://hackage.haskell.org/package/nvim-hs-2.1.0.4)
 * [List of functions that are provided by nvim-hs](https://hackage.haskell.org/package/nvim-hs-2.1.0.4/docs/Neovim-API-Text.html#v:vim_command_output)
+* [Proof of Concept for the JSON parsing (as on Raphaels Laptop, the Snippet first didn't run)](https://github.com/raphaelluethy/haskell-json)
+* [Github Issue for M1 with nvim-hs](https://github.com/neovimhaskell/nvim-hs/issues/114#issuecomment-1555978729)
+
 
 ## Contact
 - Tobias Wyss - tobias.wyss@students.fhw.ch
