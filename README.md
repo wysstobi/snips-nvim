@@ -10,7 +10,7 @@ For this purpose, a simple snippet management is provided,
 which offers the possibility to select among the available snippets using [Telescope](https://github.com/nvim-telescope/telescope.nvim)
 The snippets are persisted in an external file.
 
-![screenshot](./screenshot.png)
+![preview](./snips-preview.gif)
 
 ## Getting started
 
