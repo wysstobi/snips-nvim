@@ -3,11 +3,10 @@
 [[_TOC_]]
 
 ## About the Project
-This project is part of the module "fprod" at the FHNW in Burgg/Windisch.
-The plugin makes it possible to easily save text or code snippets and to plot 
-them at a given place if needed. 
-For this purpose, a simple snippet management is provided, 
-which offers the possibility to select among the available snippets using [Telescope](https://github.com/nvim-telescope/telescope.nvim)
+The plugin makes it possible to easily save text or code snippets and to paste
+them at a given place if needed. For this purpose, a simple snippet management
+is provided, which offers the possibility to select among the available
+snippets using [Telescope](https://github.com/nvim-telescope/telescope.nvim)
 The snippets are persisted in an external file.
 
 ![preview](./snips-preview.gif)
@@ -66,9 +65,6 @@ You can set the filetype of a file manually using `:set filetype=haskell`
 * [Haskell plugin API for neovim](https://hackage.haskell.org/package/nvim-hs)
 * [nvim-hs.vim](https://github.com/neovimhaskell/nvim-hs.vim)
 
-## Development
-- for LSP to work use and install hls version 1.10.0.0 using ghcup
-
 ### Debugging
 1. export the function in the module definition
 2. start cabal using `cabal repl`
@@ -107,10 +103,4 @@ ghci> main
 
 
 ## Contact
-- Tobias Wyss - tobias.wyss@students.fhw.ch
-- Raphael Lüthy - raphael.luethy@students.fhnw.ch
-- Andri Wild - andri.wild@students.fhnw.ch 
-
-# Notes to the lecturers
-Since the nvim-hs package is very badly documented, we lost a lot of time (and nerves) to get the plugin up and running and to interact with neovim. Please consider this in the evaluation :).
-Nothing more to say right now, but it was fun to experience Haskell in this way and to create something we can use every day. Maybe we will release the plugin later in the summer on GitHub.
+This plugin was initially created by Raphal Lüthy, Andri Wild & Tobias Wyss.
