@@ -1,7 +1,5 @@
 # Snippet Plugin for Neovim
 
-[[_TOC_]]
-
 ## About the Project
 The plugin makes it possible to easily save text or code snippets and to paste
 them at a given place if needed. For this purpose, a simple snippet management
